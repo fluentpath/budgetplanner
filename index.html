@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Budget Planner</title>
+<meta name="description" content="Household budget planner with calendar, monthly & annual views.">
+<meta name="theme-color" content="#4f6ef7">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Budget Planner">
+<style>
+:root{
+  --bg:#f4f6f9;--card:#fff;--ink:#1c2430;--sub:#6b7686;--line:#e4e8ee;
+  --accent:#4f6ef7;--accent-ink:#fff;--green:#1c9d63;--red:#e0483e;--amber:#c98a1f;
+  --radius:14px;--shadow:0 1px 2px rgba(20,25,40,.06),0 6px 20px rgba(20,25,40,.05);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--bg:#12151c;--card:#1b202b;--ink:#eef1f6;--sub:#9aa4b5;--line:#2a303c;--shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);}
+}
+:root[data-theme="dark"]{--bg:#12151c;--card:#1b202b;--ink:#eef1f6;--sub:#9aa4b5;--line:#2a303c;--shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+button,input,select,textarea{font:inherit;color:inherit;}
+h1,h2,h3{margin:0 0 6px;}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 60px;}
+header.top{position:sticky;top:0;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);padding:14px 16px 0;border-bottom:1px solid var(--line);}
+.hbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;max-width:1180px;margin:0 auto;}
+.brand{font-weight:700;font-size:17px;}
+.brand small{display:block;font-weight:400;color:var(--sub);font-size:12px;}
+nav{display:flex;gap:4px;overflow-x:auto;padding:10px 0;max-width:1180px;margin:0 auto;}
+nav button{background:none;border:none;padding:8px 14px;border-radius:10px;color:var(--sub);white-space:nowrap;cursor:pointer;font-weight:600;}
+nav button.active{background:var(--accent);color:var(--accent-ink);}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:16px 0;}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;}
+.card .label{color:var(--sub);font-size:12px;text-transform:uppercase;letter-spacing:.03em;}
+.card .val{font-size:20px;font-weight:700;margin-top:4px;}
+.section{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:16px;}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.spread{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+select,input[type=text],input[type=number],input[type=date],textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink);}
+textarea{width:100%;min-height:60px;resize:vertical;}
+.btn{background:var(--accent);color:var(--accent-ink);border:none;border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer;}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--ink);}
+.btn.danger{background:var(--red);}
+.btn.sm{padding:5px 10px;font-size:13px;}
+table{width:100%;border-collapse:collapse;}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);font-size:14px;}
+th{color:var(--sub);font-weight:600;font-size:12px;text-transform:uppercase;}
+.right{text-align:right;}
+.tblwrap{overflow-x:auto;}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge.paid{background:rgba(28,157,99,.15);color:var(--green);}
+.badge.pending{background:rgba(201,138,31,.15);color:var(--amber);}
+.badge.cancelled{background:rgba(224,72,62,.15);color:var(--red);}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px;}
+.calgrid .dow{text-align:center;color:var(--sub);font-size:11px;font-weight:700;padding-bottom:4px;}
+.day{background:var(--bg);border:1px solid var(--line);border-radius:10px;min-height:74px;padding:6px;cursor:pointer;display:flex;flex-direction:column;gap:2px;}
+.day:hover{border-color:var(--accent);}
+.day .dnum{font-weight:700;font-size:13px;}
+.day .damt{font-size:11.5px;color:var(--red);}
+.day .dinc{font-size:11.5px;color:var(--green);}
+.day.empty{background:transparent;border:none;cursor:default;}
+.day .dstatus{font-size:10px;color:var(--sub);}
+.modal-bg{position:fixed;inset:0;background:rgba(10,12,18,.5);display:flex;align-items:flex-end;justify-content:center;z-index:100;}
+@media(min-width:640px){.modal-bg{align-items:center;}}
+.modal{background:var(--card);border-radius:16px 16px 0 0;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;padding:18px;}
+@media(min-width:640px){.modal{border-radius:16px;}}
+.field{margin-bottom:10px;display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:12.5px;color:var(--sub);font-weight:600;}
+.entryline{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);gap:8px;}
+.entryline .meta{flex:1;min-width:0;}
+.entryline .desc{font-weight:600;}
+.entryline .sub{font-size:12px;color:var(--sub);}
+.close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--sub);}
+.alertbox{border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13.5px;}
+.alertbox.warn{background:rgba(201,138,31,.12);color:var(--amber);}
+.alertbox.bad{background:rgba(224,72,62,.12);color:var(--red);}
+.alertbox.good{background:rgba(28,157,99,.12);color:var(--green);}
+.bar{height:8px;border-radius:5px;background:var(--line);overflow:hidden;margin-top:4px;}
+.bar>div{height:100%;background:var(--accent);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:480px){.grid2{grid-template-columns:1fr;}}
+.catgroup{margin-bottom:14px;}
+.catgroup h4{margin:0 0 6px;font-size:13px;color:var(--sub);text-transform:uppercase;}
+footer.tag{text-align:center;color:var(--sub);font-size:12px;padding:20px 0 0;}
+input:focus,select:focus,button:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;}
+</style>
+</head>
+<body>
+<header class="top" id="header">
+  <div class="hbar">
+    <div class="brand"><span id="brandTitle">🏠 Budget Planner</span><small id="subtitle">Loading…</small></div>
+    <div class="row">
+      <button class="btn ghost sm" id="installBtn" style="display:none;" onclick="triggerInstall()">⬇ Install App</button>
+      <select id="monthSel"></select>
+      <select id="yearSel"></select>
+    </div>
+  </div>
+  <nav id="nav"></nav>
+</header>
+<div class="wrap" id="app"></div>
+<footer class="tag">Data stays in this browser (localStorage). Use Settings → Backup to save a copy.</footer>
+
+<script>
+/* ---------- Data layer (single source of truth) ---------- */
+/* legacy single-blob key, kept only for migration reference: "hbp_v1" */
+const DEFAULT_CATS = {
+  "Housing/Utility":["Mortgage","Electricity","Water","Internet","Gas","Other"],
+  "Food":["Groceries","Dining Out","Food Delivery","Other"],
+  "School":["Tuition Fee","Service","Uniform","Extra Curricular","Other"],
+  "Health":["Medical Emergency","Vaccines","Other"],
+  "Personal":["Clothing","Personal Care","Online Shopping","Birthdays/Events","Other"],
+  "Transportation":["Other"],"Insurance":["Other"],"Debt":["Other"],
+  "Entertainment":["Other"],"Savings":["Other"],"Miscellaneous":["Other"]
+};
+function blankDB(){
+  return { transactions:[], budgets:[], categories:JSON.parse(JSON.stringify(DEFAULT_CATS)), settings:{currency:"PHP", defaultYear:2026, defaultMonth:9, firstDay:"Sun", displayName:""} };
+}
+let DB = blankDB(); // replaced with the signed-in account's data once authenticated
+function dataKey(email){ return "hbp_data_v1__"+email; }
+function loadDBFor(email){
+  try{ const raw = localStorage.getItem(dataKey(email)); if(raw) return JSON.parse(raw); }catch(e){}
+  return blankDB();
+}
+function save(){
+  const email = localStorage.getItem(CURRENT_EMAIL_KEY);
+  if(!email) return;
+  try{ localStorage.setItem(dataKey(email), JSON.stringify(DB)); }catch(e){ toast("Unable to save. Your existing data has not been deleted.", true);} }
+function uid(){ return "TXN-"+Date.now().toString(36).toUpperCase()+"-"+Math.random().toString(16).slice(2,7).toUpperCase(); }
+function nowISO(){ return new Date().toISOString(); }
+
+/* ---------- Local email/password gate ---------- */
+/* NOTE: this is a client-only lock stored in this browser (no server), so it
+   personalizes/protects access on THIS device only — it is not secure
+   authentication across devices. For real multi-device security a backend
+   would be required. Each email gets its own private data record in this
+   browser's storage, so signing out and back in with the same email restores
+   that account's budget data. */
+const ACCOUNTS_KEY="hbp_accounts_v1", CURRENT_EMAIL_KEY="hbp_current_email";
+function loadAccounts(){
+  try{ const raw=JSON.parse(localStorage.getItem(ACCOUNTS_KEY)); if(raw) return raw; }catch(e){}
+  // migrate a legacy single-account record from an earlier version, if present
+  try{ const legacy=JSON.parse(localStorage.getItem("hbp_auth_v1"));
+    if(legacy && legacy.email){
+      const accts={ [legacy.email]: {hash:legacy.hash, name:legacy.name} };
+      localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accts));
+      const legacyOldData = localStorage.getItem("hbp_v1");
+      if(legacyOldData) localStorage.setItem(dataKey(legacy.email), legacyOldData);
+      return accts;
+    }
+  }catch(e){}
+  return {};
+}
+function saveAccounts(a){ localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(a)); }
+async function hashPass(pw){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pw));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+function authScreen(mode, err){
+  const isSignup = mode==="signup";
+  document.getElementById("header").style.display="none";
+  document.getElementById("app").innerHTML="";
+  const html=`<div class="section" style="max-width:400px;margin:60px auto;background:transparent;box-shadow:none;border:1px solid var(--line);">
+    <h2>${isSignup?"Create your account":"Welcome back"}</h2>
+    <p style="color:var(--sub);font-size:13px;">🔒 Stored only in this browser — for personalization, not shared/cloud login.</p>
+    ${err?`<div class="alertbox bad">${err}</div>`:""}
+    ${isSignup?`<div class="field"><label>Your Name (used in the app title)</label><input type="text" id="authName" placeholder="e.g. Yumi"></div>`:""}
+    <div class="field"><label>Email</label><input type="text" id="authEmail" autocomplete="username"></div>
+    <div class="field"><label>Password</label><input type="text" id="authPass" autocomplete="${isSignup?'new-password':'current-password'}"></div>
+    ${isSignup?`<div class="field"><label>Confirm Password</label><input type="text" id="authPass2"></div>`:""}
+    <button class="btn" id="authSubmit" style="width:100%;margin-top:6px;">${isSignup?"Create My Budget Planner":"Log In"}</button>
+    <p style="text-align:center;margin-top:10px;font-size:13px;">
+      <button type="button" id="authSwitch" class="close" style="text-decoration:underline;color:var(--accent);font-size:13px;">${isSignup? "Already have an account? Log in" : "No account yet? Create one"}</button>
+    </p>
+  </div>`;
+  document.getElementById("app").innerHTML=html;
+  document.getElementById("authSwitch").onclick=()=>{ authScreen(isSignup?"login":"signup"); };
+  document.getElementById("authSubmit").onclick=async ()=>{
+    const email=(document.getElementById("authEmail").value||"").trim().toLowerCase();
+    const pass=document.getElementById("authPass").value||"";
+    if(!email || !pass){ authScreen(mode,"Email and password are required."); return; }
+    const accounts=loadAccounts();
+    if(isSignup){
+      const name=(document.getElementById("authName").value||"").trim();
+      const pass2=document.getElementById("authPass2").value||"";
+      if(!name){ authScreen(mode,"Please enter a name."); return; }
+      if(pass!==pass2){ authScreen(mode,"Passwords do not match."); return; }
+      if(accounts[email]){ authScreen("login","An account with that email already exists — please log in instead."); return; }
+      const hash=await hashPass(pass);
+      accounts[email]={hash,name}; saveAccounts(accounts);
+      localStorage.setItem(CURRENT_EMAIL_KEY, email);
+      DB = blankDB(); DB.settings.displayName=name; save();
+      renderAll();
+    } else {
+      const acct=accounts[email];
+      const hash=await hashPass(pass);
+      if(!acct || acct.hash!==hash){ authScreen(mode,"Incorrect email or password."); return; }
+      localStorage.setItem(CURRENT_EMAIL_KEY, email);
+      DB = loadDBFor(email);
+      if(!DB.settings.displayName) DB.settings.displayName = acct.name;
+      renderAll();
+    }
+  };
+}
+function checkAuth(){
+  const email = localStorage.getItem(CURRENT_EMAIL_KEY);
+  const accounts = loadAccounts();
+  if(email && accounts[email]){ DB = loadDBFor(email); renderAll(); return; }
+  authScreen(Object.keys(accounts).length ? "login" : "signup");
+}
+function logOut(){ localStorage.removeItem(CURRENT_EMAIL_KEY); checkAuth(); }
+
+/* ---------- Formula engine ---------- */
+const isExpenseType = t => t.type==="expense" || t.type==="bill";
+const F = {
+  txForMonth:(y,m)=>DB.transactions.filter(t=>t.year===y&&t.month===m&&t.status!=="cancelled"),
+  monthlyIncome:(y,m)=>F.txForMonth(y,m).filter(t=>t.type==="income").reduce((s,t)=>s+t.amount,0),
+  monthlyBudget:(y,m)=>DB.budgets.filter(b=>b.year===y&&b.month===m).reduce((s,b)=>s+b.budgetAmount,0),
+  monthlyActual:(y,m)=>F.txForMonth(y,m).filter(t=>isExpenseType(t)&&t.status==="paid").reduce((s,t)=>s+t.amount,0),
+  monthlyPending:(y,m)=>F.txForMonth(y,m).filter(t=>isExpenseType(t)&&t.status==="pending").reduce((s,t)=>s+t.amount,0),
+  remaining:(y,m)=>F.monthlyIncome(y,m)-F.monthlyActual(y,m),
+  potentialRemaining:(y,m)=>F.monthlyIncome(y,m)-F.monthlyActual(y,m)-F.monthlyPending(y,m),
+  savings:(y,m)=>F.monthlyIncome(y,m)-F.monthlyActual(y,m),
+  savingsRate:(y,m)=>{ const inc=F.monthlyIncome(y,m); return inc>0 ? (F.savings(y,m)/inc*100) : 0; },
+  variance:(b,a)=>b-a,
+  categoryTotals:(y,m,mode)=>{ // mode: budget|actual
+    const out={};
+    if(mode==="budget"){ DB.budgets.filter(b=>b.year===y&&b.month===m).forEach(b=>{ out[b.category]=(out[b.category]||0)+b.budgetAmount; }); }
+    else { F.txForMonth(y,m).filter(isExpenseType).forEach(t=>{ out[t.category]=(out[t.category]||0)+t.amount; }); }
+    return out;
+  },
+  annual:(y)=>{
+    let inc=0,bud=0,act=0; const months=[];
+    for(let m=1;m<=12;m++){ const i=F.monthlyIncome(y,m),b=F.monthlyBudget(y,m),a=F.monthlyActual(y,m);
+      inc+=i; bud+=b; act+=a; months.push({m,income:i,budget:b,actual:a,remaining:i-a,savings:i-a}); }
+    return {months,income:inc,budget:bud,actual:act,savings:inc-act,savingsRate:inc>0?(inc-act)/inc*100:0,variance:bud-act};
+  }
+};
+function money(n){
+  n = Number(n)||0; if(!isFinite(n)) n=0;
+  const sym = DB.settings.currency==="PHP"?"₱":DB.settings.currency==="USD"?"$":DB.settings.currency+" ";
+  return sym+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function pct(n){ n=Number(n); if(!isFinite(n)) n=0; return n.toFixed(1)+"%"; }
+
+/* ---------- State ---------- */
+let view = DB.settings.defaultYear ? "dashboard":"dashboard";
+let curYear = DB.settings.defaultYear||2026, curMonth = DB.settings.defaultMonth||9;
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+/* ---------- Nav & topbar ---------- */
+const NAVS=[["dashboard","Dashboard"],["calendar","Calendar"],["monthly","Monthly Expenses"],["annual","Annual Budget"],["history","History"],["settings","Settings"]];
+function renderNav(){
+  document.getElementById("header").style.display="";
+  document.getElementById("nav").innerHTML = NAVS.map(([k,l])=>`<button data-v="${k}" class="${view===k?'active':''}">${l}</button>`).join("");
+  document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{ view=b.dataset.v; renderAll(); });
+  const dn = DB.settings.displayName;
+  document.getElementById("brandTitle").textContent = dn ? `🏠 ${dn}'s Budget Planner` : "🏠 Budget Planner";
+  document.getElementById("subtitle").textContent = `🔒 Local workspace • ${MONTHS[curMonth-1]} ${curYear}`;
+}
+function renderTopSelects(){
+  const ms=document.getElementById("monthSel"), ys=document.getElementById("yearSel");
+  ms.innerHTML = MONTHS.map((m,i)=>`<option value="${i+1}" ${i+1===curMonth?'selected':''}>${m}</option>`).join("");
+  const years=[]; for(let yy=2026; yy<=2040; yy++) years.push(yy);
+  if(!years.includes(curYear)) years.push(curYear);
+  ys.innerHTML = years.sort((a,b)=>a-b).map(y=>`<option value="${y}" ${y===curYear?'selected':''}>${y}</option>`).join("");
+  ms.onchange=()=>{ curMonth=Number(ms.value); renderAll(); };
+  ys.onchange=()=>{ curYear=Number(ys.value); renderAll(); };
+}
+
+/* ---------- Toast ---------- */
+function toast(msg, bad){
+  let t=document.createElement("div"); t.textContent=msg;
+  t.style.cssText=`position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:${bad?'var(--red)':'var(--ink)'};color:#fff;padding:10px 16px;border-radius:10px;z-index:999;font-size:13.5px;box-shadow:var(--shadow);`;
+  document.body.appendChild(t); setTimeout(()=>t.remove(),2600);
+}
+
+/* ---------- Views ---------- */
+function renderDashboard(){
+  const y=curYear,m=curMonth;
+  const inc=F.monthlyIncome(y,m), bud=F.monthlyBudget(y,m), act=F.monthlyActual(y,m), pend=F.monthlyPending(y,m), rem=F.remaining(y,m), sav=F.savings(y,m), rate=F.savingsRate(y,m);
+  let alerts="";
+  const cats = F.categoryTotals(y,m,"actual"), bcats=F.categoryTotals(y,m,"budget");
+  Object.keys(bcats).forEach(c=>{ if((cats[c]||0) > bcats[c]) alerts+=`<div class="alertbox bad">⚠ ${c} spending has exceeded budget by ${money(cats[c]-bcats[c])}.</div>`; });
+  if(pend>0) alerts+=`<div class="alertbox warn">🕒 ${F.txForMonth(y,m).filter(t=>isExpenseType(t)&&t.status==='pending').length} pending expense(s) totaling ${money(pend)}.</div>`;
+  if(sav>0) alerts+=`<div class="alertbox good">💰 You are currently saving ${money(sav)} this month (${pct(rate)}).</div>`;
+  return `
+  <div class="section"><h2>${MONTHS[m-1]} ${y}</h2>
+  <div class="cards">
+    <div class="card"><div class="label">Income</div><div class="val">${money(inc)}</div></div>
+    <div class="card"><div class="label">Budgeted Expenses</div><div class="val">${money(bud)}</div></div>
+    <div class="card"><div class="label">Actual Expenses</div><div class="val">${money(act)}</div></div>
+    <div class="card"><div class="label">Pending Expenses</div><div class="val">${money(pend)}</div></div>
+    <div class="card"><div class="label">Remaining Budget</div><div class="val">${money(rem)}</div></div>
+    <div class="card"><div class="label">Savings</div><div class="val">${money(sav)}</div></div>
+    <div class="card"><div class="label">Savings Rate</div><div class="val">${pct(rate)}</div></div>
+  </div></div>
+  <div class="section">${alerts||'<div class="alertbox good">No alerts — everything looks on track.</div>'}</div>
+  `;
+}
+
+function daysInMonth(y,m){ return new Date(y,m,0).getDate(); }
+function renderCalendar(){
+  const y=curYear,m=curMonth;
+  const first = new Date(y,m-1,1).getDay();
+  const dim = daysInMonth(y,m);
+  let cells = Array(first).fill('<div class="day empty"></div>');
+  for(let d=1; d<=dim; d++){
+    const dateStr = `${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const entries = DB.transactions.filter(t=>t.date===dateStr);
+    const exp = entries.filter(isExpenseType).reduce((s,t)=>s+t.amount,0);
+    const inc = entries.filter(t=>t.type==="income").reduce((s,t)=>s+t.amount,0);
+    const allPaid = entries.length && entries.every(t=>t.status==="paid");
+    cells.push(`<div class="day" data-d="${dateStr}">
+      <div class="dnum">${d}</div>
+      ${exp?`<div class="damt">-${money(exp)}</div>`:""}
+      ${inc?`<div class="dinc">+${money(inc)}</div>`:""}
+      ${entries.length?`<div class="dstatus">${entries.length} entr${entries.length>1?'ies':'y'} ${allPaid?'• Paid':''}</div>`:""}
+    </div>`);
+  }
+  return `<div class="section">
+    <div class="spread"><h2>${MONTHS[m-1]} ${y}</h2>
+      <div class="row">
+        <button class="btn ghost sm" id="prevM">‹ Prev</button>
+        <button class="btn ghost sm" id="nextM">Next ›</button>
+      </div>
+    </div>
+    <div class="calgrid">
+      ${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d=>`<div class="dow">${d}</div>`).join("")}
+      ${cells.join("")}
+    </div>
+  </div>`;
+}
+
+function renderMonthly(){
+  const y=curYear,m=curMonth;
+  const inc=F.monthlyIncome(y,m), bud=F.monthlyBudget(y,m), act=F.monthlyActual(y,m), pend=F.monthlyPending(y,m);
+  const incomeTx = F.txForMonth(y,m).filter(t=>t.type==="income");
+  let incRows = incomeTx.map(t=>`<tr><td>${t.description}</td><td class="right">${money(t.amount)}</td></tr>`).join("")
+    || `<tr><td colspan="2" style="color:var(--sub)">No income entries yet.</td></tr>`;
+  let catBlocks="";
+  Object.keys(DB.categories).forEach(cat=>{
+    const budgets = DB.budgets.filter(b=>b.year===y&&b.month===m&&b.category===cat);
+    const txs = F.txForMonth(y,m).filter(t=>isExpenseType(t)&&t.category===cat);
+    if(!budgets.length && !txs.length) return;
+    const subs = new Set([...budgets.map(b=>b.subcategory), ...txs.map(t=>t.subcategory)]);
+    let rows="";
+    subs.forEach(sub=>{
+      const b = budgets.filter(x=>x.subcategory===sub).reduce((s,x)=>s+x.budgetAmount,0);
+      const a = txs.filter(x=>x.subcategory===sub).reduce((s,x)=>s+x.amount,0);
+      const diff = b-a;
+      const status = diff>0?"UNDER":diff<0?"OVER":"ON BUDGET";
+      const color = diff>0?"var(--green)":diff<0?"var(--red)":"var(--sub)";
+      rows+=`<tr><td>${sub}</td><td class="right">${money(b)}</td><td class="right">${money(a)}</td><td class="right" style="color:${color}">${money(Math.abs(diff))} ${status}</td></tr>`;
+    });
+    catBlocks+=`<div class="catgroup"><h4>${cat}</h4><div class="tblwrap"><table><tr><th>Subcategory</th><th class="right">Budgeted</th><th class="right">Actual</th><th class="right">Difference</th></tr>${rows}</table></div></div>`;
+  });
+  return `<div class="section"><h2>Monthly Expenses — ${MONTHS[m-1]} ${y}</h2>
+    <h3 style="margin-top:14px;">Income</h3>
+    <div class="tblwrap"><table><tr><th>Source</th><th class="right">Amount</th></tr>${incRows}
+      <tr><td><b>TOTAL</b></td><td class="right"><b>${money(inc)}</b></td></tr></table></div>
+    </div>
+  <div class="section">${catBlocks || '<p style="color:var(--sub)">No budgeted or actual expenses recorded yet. Add entries via the Calendar.</p>'}</div>
+  <div class="section"><h3>Monthly Summary</h3>
+    <table>
+      <tr><td>Income</td><td class="right">${money(inc)}</td></tr>
+      <tr><td>Budgeted Expenses</td><td class="right">${money(bud)}</td></tr>
+      <tr><td>Actual Expenses</td><td class="right">${money(act)}</td></tr>
+      <tr><td>Pending Expenses</td><td class="right">${money(pend)}</td></tr>
+      <tr><td>Remaining Budget</td><td class="right">${money(F.remaining(y,m))}</td></tr>
+      <tr><td>Potential Remaining</td><td class="right">${money(F.potentialRemaining(y,m))}</td></tr>
+      <tr><td>Savings</td><td class="right">${money(F.savings(y,m))}</td></tr>
+      <tr><td>Savings Rate</td><td class="right">${pct(F.savingsRate(y,m))}</td></tr>
+    </table>
+  </div>`;
+}
+
+function renderAnnual(){
+  const y=curYear;
+  const a = F.annual(y);
+  const rows = a.months.map(mo=>`<tr><td>${MONTHS[mo.m-1]}</td><td class="right">${money(mo.income)}</td><td class="right">${money(mo.budget)}</td><td class="right">${money(mo.actual)}</td><td class="right">${money(mo.remaining)}</td><td class="right">${money(mo.savings)}</td></tr>`).join("");
+  const cats = {};
+  for(let m=1;m<=12;m++){ const c=F.categoryTotals(y,m,"actual"); Object.keys(c).forEach(k=>cats[k]=(cats[k]||0)+c[k]); }
+  const maxCat = Math.max(1,...Object.values(cats));
+  const catRows = Object.entries(cats).sort((x,z)=>z[1]-x[1]).map(([k,v])=>`<div style="margin-bottom:8px;"><div class="spread"><span>${k}</span><span>${money(v)}</span></div><div class="bar"><div style="width:${(v/maxCat*100).toFixed(0)}%"></div></div></div>`).join("") || '<p style="color:var(--sub)">No data yet.</p>';
+  return `<div class="section"><h2>Annual Budget — ${y}</h2>
+    <div class="tblwrap"><table><tr><th>Month</th><th class="right">Income</th><th class="right">Budget</th><th class="right">Actual</th><th class="right">Remaining</th><th class="right">Savings</th></tr>
+    ${rows}<tr><td><b>TOTAL</b></td><td class="right"><b>${money(a.income)}</b></td><td class="right"><b>${money(a.budget)}</b></td><td class="right"><b>${money(a.actual)}</b></td><td class="right"><b>${money(a.income-a.actual)}</b></td><td class="right"><b>${money(a.savings)}</b></td></tr></table></div>
+  </div>
+  <div class="cards">
+    <div class="card"><div class="label">Annual Savings</div><div class="val">${money(a.savings)}</div></div>
+    <div class="card"><div class="label">Savings Rate</div><div class="val">${pct(a.savingsRate)}</div></div>
+    <div class="card"><div class="label">Budget Variance</div><div class="val">${money(a.variance)}</div></div>
+  </div>
+  <div class="section"><h3>Annual Expense Breakdown (Actual)</h3>${catRows}</div>`;
+}
+
+function renderHistory(){
+  const years = [...new Set(DB.transactions.map(t=>t.year))].sort((a,b)=>b-a);
+  const tree = years.map(y=>{
+    const months = [...new Set(DB.transactions.filter(t=>t.year===y).map(t=>t.month))].sort((a,b)=>a-b);
+    return `<div style="margin-bottom:10px;"><b>${y}</b><div class="row" style="margin-top:4px;">${months.map(m=>`<button class="btn ghost sm hist-jump" data-y="${y}" data-m="${m}">${MONTHS[m-1]}</button>`).join("")}</div></div>`;
+  }).join("") || '<p style="color:var(--sub)">No history yet.</p>';
+  return `<div class="section"><h2>History</h2>
+    <div class="field"><label>Search transactions</label><input type="text" id="histSearch" placeholder="e.g. Electricity"></div>
+    <div class="row">
+      <select id="filtType"><option value="">All types</option><option value="expense">Expense</option><option value="income">Income</option></select>
+      <select id="filtStatus"><option value="">All statuses</option><option value="paid">Paid</option><option value="pending">Pending</option><option value="cancelled">Cancelled</option></select>
+    </div>
+    <div id="histResults" style="margin-top:10px;"></div>
+    </div>
+  <div class="section"><h3>Browse by Month</h3>${tree}</div>`;
+}
+function runHistSearch(){
+  const q=(document.getElementById("histSearch").value||"").toLowerCase();
+  const ty=document.getElementById("filtType").value, st=document.getElementById("filtStatus").value;
+  let res = DB.transactions.filter(t=>
+    (!q || t.description.toLowerCase().includes(q) || t.category.toLowerCase().includes(q) || (t.subcategory||"").toLowerCase().includes(q)) &&
+    (!ty || t.type===ty) && (!st || t.status===st)
+  ).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,100);
+  document.getElementById("histResults").innerHTML = res.length ? res.map(t=>`
+    <div class="entryline"><div class="meta"><div class="desc">${t.description}</div><div class="sub">${t.date} • ${t.category}${t.subcategory?(' / '+t.subcategory):''}</div></div>
+    <div class="right"><div>${money(t.amount)}</div><span class="badge ${t.status}">${t.status.toUpperCase()}</span></div></div>`).join("")
+    : '<p style="color:var(--sub)">No matching transactions.</p>';
+}
+
+function renderSettings(){
+  const currentEmail = localStorage.getItem(CURRENT_EMAIL_KEY);
+  return `<div class="section"><h2>Settings</h2>
+  <h3>Account</h3>
+  <div class="field"><label>Title Name (shown as "&lt;name&gt;'s Budget Planner")</label>
+    <div class="row"><input type="text" id="setDisplayName" value="${(DB.settings.displayName||"").replace(/"/g,'&quot;')}" placeholder="Your name"><button class="btn ghost sm" id="saveDisplayName">Save</button></div>
+  </div>
+  <p style="color:var(--sub);font-size:13px;">Signed in as ${currentEmail||"—"} <span style="opacity:.7;">(local to this browser)</span></p>
+  <button class="btn ghost sm" id="logOutBtn">Log Out</button>
+  </div>
+  <div class="section"><h3 style="margin-top:0;">General</h3>
+  <div class="grid2">
+    <div class="field"><label>Currency</label><select id="setCurrency">
+      <option value="PHP" ${DB.settings.currency==="PHP"?"selected":""}>PHP (₱)</option>
+      <option value="USD" ${DB.settings.currency==="USD"?"selected":""}>USD ($)</option>
+    </select></div>
+    <div class="field"><label>Default Month/Year</label><div class="row"><span>${MONTHS[curMonth-1]} ${curYear} (current view)</span></div></div>
+  </div></div>
+  <div class="section"><h3>Categories</h3>
+    <div id="catList">${Object.keys(DB.categories).map(c=>`<span class="badge" style="background:var(--bg);color:var(--ink);border:1px solid var(--line);margin:2px;">${c}</span>`).join(" ")}</div>
+    <div class="row" style="margin-top:10px;"><input type="text" id="newCat" placeholder="New category name"><button class="btn ghost sm" id="addCatBtn">+ Add Category</button></div>
+  </div>
+  <div class="section"><h3>Google Sheets Integration</h3>
+    <div class="field"><label>Master Sheet URL / Web App Endpoint</label><input type="text" id="gsEndpoint" placeholder="https://script.google.com/macros/s/..." style="width:100%"></div>
+    <p style="color:var(--sub);font-size:13px;">● Not Connected — this lean build ships the settings UI and a documented request format (see notes below); wiring up a live Apps Script sync is a follow-up step, since it requires deploying a script under your own Google account.</p>
+    <div class="row"><button class="btn ghost sm" disabled>Test Connection</button><button class="btn ghost sm" disabled>Sync Now</button></div>
+  </div>
+  <div class="section"><h3>Data</h3>
+    <div class="row">
+      <button class="btn ghost sm" id="exportJson">Export JSON</button>
+      <button class="btn ghost sm" id="exportCsv">Export CSV</button>
+      <button class="btn ghost sm" id="backupBtn">Backup</button>
+      <label class="btn ghost sm" style="cursor:pointer;">Restore/Import<input type="file" id="importFile" accept=".json" style="display:none;"></label>
+    </div>
+    <div class="row" style="margin-top:14px;">
+      <button class="btn danger" id="resetAllBtn">Reset All Data</button>
+    </div>
+  </div>`;
+}
+
+/* ---------- Entry modal ---------- */
+let editingId=null, modalDate=null;
+function catOptions(){ return Object.keys(DB.categories).map(c=>`<option value="${c}">${c}</option>`).concat('<option value="Income">Income</option>').join(""); }
+function openDayModal(dateStr){
+  modalDate=dateStr;
+  const entries = DB.transactions.filter(t=>t.date===dateStr);
+  const total = entries.filter(isExpenseType).reduce((s,t)=>s+t.amount,0);
+  const html = `<div class="modal-bg" id="modalBg"><div class="modal">
+    <div class="spread"><h2>${dateStr}</h2><button class="close" id="closeModal">✕</button></div>
+    <button class="btn sm" id="addEntryBtn">+ Add Entry</button>
+    <div id="entryList" style="margin-top:10px;">
+      ${entries.length? entries.map(t=>`
+        <div class="entryline"><div class="meta"><div class="desc">${t.description}</div><div class="sub">${t.category}${t.subcategory?' / '+t.subcategory:''}${t.paymentSource?' • '+t.paymentSource:''}</div></div>
+        <div class="right"><div>${t.type==='income'?'+':''}${money(t.amount)}</div><span class="badge ${t.status}">${t.status.toUpperCase()}</span></div>
+        <div class="row"><button class="btn ghost sm edit-tx" data-id="${t.id}">Edit</button><button class="btn ghost sm del-tx" data-id="${t.id}">Delete</button></div></div>`).join("")
+        : '<p style="color:var(--sub)">No entries yet.</p>'}
+    </div>
+    <div class="spread" style="margin-top:10px;"><b>Daily Total (expenses)</b><b>${money(total)}</b></div>
+  </div></div>`;
+  document.body.insertAdjacentHTML("beforeend", html);
+  document.getElementById("closeModal").onclick=closeModal;
+  document.getElementById("modalBg").onclick=e=>{ if(e.target.id==="modalBg") closeModal(); };
+  document.getElementById("addEntryBtn").onclick=()=>{ editingId=null; openEntryForm(); };
+  document.querySelectorAll(".edit-tx").forEach(b=>b.onclick=()=>{ editingId=b.dataset.id; openEntryForm(); });
+  document.querySelectorAll(".del-tx").forEach(b=>b.onclick=()=>{
+    const txDesc = (entries.find(t=>t.id===b.dataset.id)||{}).description || "this entry";
+    showConfirm(`Delete "${txDesc}"?\nThis cannot be undone.`, ()=>{
+      DB.transactions=DB.transactions.filter(t=>t.id!==b.dataset.id); save(); closeModal(); openDayModal(dateStr); renderAll(); toast("Entry deleted.");
+    }, {danger:true, yesLabel:"Delete"});
+  });
+}
+function closeModal(){ const m=document.getElementById("modalBg"); if(m) m.remove(); const f=document.getElementById("formBg"); if(f) f.remove(); }
+function showConfirm(message, onConfirm, options={}){
+  document.querySelectorAll("#confirmBg").forEach(n=>n.remove());
+  const html = `<div class="modal-bg" id="confirmBg" style="z-index:200;"><div class="modal" style="max-width:400px;">
+    <p style="white-space:pre-line;margin-top:0;">${message}</p>
+    ${options.requireText ? `<div class="field"><label>Type ${options.requireText} to confirm</label><input type="text" id="confirmInput" autocomplete="off"></div>` : ''}
+    <div class="row"><button class="btn ${options.danger?'danger':''}" id="confirmYes">${options.yesLabel||'Confirm'}</button><button class="btn ghost" id="confirmNo">Cancel</button></div>
+  </div></div>`;
+  document.body.insertAdjacentHTML("beforeend", html);
+  const bg=document.getElementById("confirmBg");
+  document.getElementById("confirmNo").onclick=()=>bg.remove();
+  bg.onclick=(e)=>{ if(e.target===bg) bg.remove(); };
+  document.getElementById("confirmYes").onclick=()=>{
+    if(options.requireText){
+      const v=(document.getElementById("confirmInput").value||"").trim();
+      if(v!==options.requireText){ toast("Confirmation text doesn't match. Nothing was changed.", true); return; }
+    }
+    bg.remove();
+    onConfirm();
+  };
+}
+function openEntryForm(){
+  const t = editingId ? DB.transactions.find(x=>x.id===editingId) : null;
+  const html = `<div class="modal-bg" id="formBg"><div class="modal">
+    <div class="spread"><h2>${t?'Edit':'Add'} Entry</h2><button class="close" id="closeForm">✕</button></div>
+    <div class="field"><label>Entry Type</label><select id="fType">
+      <option value="expense" ${t&&t.type==='expense'?'selected':''}>Expense</option>
+      <option value="income" ${t&&t.type==='income'?'selected':''}>Income</option>
+      <option value="bill" ${t&&t.type==='bill'?'selected':''}>Bill</option>
+      <option value="savings" ${t&&t.type==='savings'?'selected':''}>Savings</option>
+    </select></div>
+    <div class="field"><label>Description</label><input type="text" id="fDesc" value="${t?t.description.replace(/"/g,'&quot;'):''}"></div>
+    <div class="field"><label>Category</label><select id="fCat">${catOptions()}</select></div>
+    <div class="field"><label>Subcategory</label><input type="text" id="fSub" value="${t?t.subcategory||'':''}" placeholder="Other"></div>
+    <div class="field"><label>Amount</label><input type="number" id="fAmt" min="0" step="0.01" value="${t?t.amount:''}"></div>
+    <div class="field"><label>Status</label><select id="fStatus">
+      <option value="paid" ${t&&t.status==='paid'?'selected':''}>Paid</option>
+      <option value="pending" ${t&&t.status==='pending'?'selected':''}>Pending</option>
+      <option value="cancelled" ${t&&t.status==='cancelled'?'selected':''}>Cancelled</option>
+    </select></div>
+    <div class="field"><label>Payment Source</label><select id="fSrc">
+      ${["","Salary 1","Salary 2","Cash","Bank","Card","Other"].map(s=>`<option ${t&&t.paymentSource===s?'selected':''}>${s}</option>`).join("")}
+    </select></div>
+    <div class="field"><label>Notes</label><textarea id="fNotes">${t?t.notes||'':''}</textarea></div>
+    <div class="row"><button class="btn" id="saveEntry">Save Entry</button><button class="btn ghost" id="cancelEntry">Cancel</button></div>
+  </div></div>`;
+  document.body.insertAdjacentHTML("beforeend", html);
+  if(t) document.getElementById("fCat").value = t.category;
+  document.getElementById("closeForm").onclick=()=>document.getElementById("formBg").remove();
+  document.getElementById("cancelEntry").onclick=()=>document.getElementById("formBg").remove();
+  document.getElementById("saveEntry").onclick=()=>{
+    const desc=document.getElementById("fDesc").value.trim();
+    const amt=parseFloat(document.getElementById("fAmt").value);
+    if(!desc){ toast("Description is required.", true); return; }
+    if(isNaN(amt) || amt<0){ toast("Amount must be a valid non-negative number.", true); return; }
+    const type=document.getElementById("fType").value;
+    const [y,m] = modalDate.split("-").map(Number);
+    const data = {
+      date:modalDate, year:y, month:m, type,
+      category: type==="income" ? "Income" : document.getElementById("fCat").value,
+      subcategory: document.getElementById("fSub").value.trim()||"Other",
+      description:desc, amount:amt, status:document.getElementById("fStatus").value,
+      paymentSource:document.getElementById("fSrc").value, notes:document.getElementById("fNotes").value,
+      updatedAt: nowISO()
+    };
+    if(editingId){ Object.assign(DB.transactions.find(x=>x.id===editingId), data); }
+    else { DB.transactions.push({id:uid(), createdAt:nowISO(), ...data}); }
+    save(); document.getElementById("formBg").remove(); closeModal(); openDayModal(modalDate); renderAll();
+    toast("Entry saved.");
+  };
+}
+
+/* ---------- Main render ---------- */
+function renderAll(){
+  renderNav(); renderTopSelects();
+  const app=document.getElementById("app");
+  if(view==="dashboard") app.innerHTML = renderDashboard()+renderCalendar();
+  else if(view==="calendar") app.innerHTML = renderCalendar();
+  else if(view==="monthly") app.innerHTML = renderMonthly();
+  else if(view==="annual") app.innerHTML = renderAnnual();
+  else if(view==="history") app.innerHTML = renderHistory();
+  else if(view==="settings") app.innerHTML = renderSettings();
+  attachHandlers();
+}
+function attachHandlers(){
+  document.querySelectorAll(".day[data-d]").forEach(d=>d.onclick=()=>openDayModal(d.dataset.d));
+  const pm=document.getElementById("prevM"), nm=document.getElementById("nextM");
+  if(pm) pm.onclick=()=>{ curMonth--; if(curMonth<1){curMonth=12;curYear--;} renderAll(); };
+  if(nm) nm.onclick=()=>{ curMonth++; if(curMonth>12){curMonth=1;curYear++;} renderAll(); };
+  document.querySelectorAll(".hist-jump").forEach(b=>b.onclick=()=>{ curYear=Number(b.dataset.y); curMonth=Number(b.dataset.m); view="monthly"; renderAll(); });
+  const hs=document.getElementById("histSearch");
+  if(hs){ runHistSearch(); hs.oninput=runHistSearch; document.getElementById("filtType").onchange=runHistSearch; document.getElementById("filtStatus").onchange=runHistSearch; }
+  const sc=document.getElementById("setCurrency"); if(sc) sc.onchange=()=>{ DB.settings.currency=sc.value; save(); renderAll(); };
+  const sdn=document.getElementById("saveDisplayName"); if(sdn) sdn.onclick=()=>{
+    DB.settings.displayName=(document.getElementById("setDisplayName").value||"").trim(); save(); renderAll(); toast("Title updated.");
+  };
+  const lob=document.getElementById("logOutBtn"); if(lob) lob.onclick=()=>logOut();
+  const acb=document.getElementById("addCatBtn"); if(acb) acb.onclick=()=>{
+    const v=document.getElementById("newCat").value.trim(); if(!v) return;
+    if(!DB.categories[v]) DB.categories[v]=["Other"]; save(); renderAll();
+  };
+  const ej=document.getElementById("exportJson"); if(ej) ej.onclick=()=>downloadFile("budget-data.json", JSON.stringify(DB,null,2), "application/json");
+  const ec=document.getElementById("exportCsv"); if(ec) ec.onclick=()=>{
+    const rows=["ID,Date,Year,Month,Type,Category,Subcategory,Description,Amount,Status,PaymentSource,Notes"];
+    DB.transactions.forEach(t=>rows.push([t.id,t.date,t.year,t.month,t.type,t.category,t.subcategory,`"${(t.description||'').replace(/"/g,'""')}"`,t.amount,t.status,t.paymentSource,`"${(t.notes||'').replace(/"/g,'""')}"`].join(",")));
+    downloadFile("budget-transactions.csv", rows.join("\n"), "text/csv");
+  };
+  const bk=document.getElementById("backupBtn"); if(bk) bk.onclick=()=>downloadFile(`budget-planner-backup-${new Date().toISOString().slice(0,10)}.json`, JSON.stringify(DB,null,2), "application/json");
+  const imp=document.getElementById("importFile"); if(imp) imp.onchange=(e)=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{ try{ const data=JSON.parse(r.result);
+        if(!data.transactions || !Array.isArray(data.transactions)) throw new Error("bad format");
+        showConfirm("Restoring will merge this backup into your current data.\nContinue?", ()=>{
+          data.transactions.forEach(t=>{ if(!DB.transactions.find(x=>x.id===t.id)) DB.transactions.push(t); });
+          (data.budgets||[]).forEach(b=>{ if(!DB.budgets.find(x=>x.id===b.id)) DB.budgets.push(b); });
+          save(); renderAll(); toast("Backup restored.");
+        }, {yesLabel:"Restore"});
+      }catch(err){ toast("Invalid backup file.", true); }
+      imp.value=""; };
+    r.readAsText(f);
+  };
+  const ra=document.getElementById("resetAllBtn"); if(ra) ra.onclick=()=>{
+    showConfirm("This will permanently delete ALL locally stored transactions, budgets and historical records.\nThis action cannot be undone.", ()=>{
+      DB={transactions:[],budgets:[],categories:JSON.parse(JSON.stringify(DEFAULT_CATS)),settings:DB.settings}; save(); renderAll(); toast("All data reset.");
+    }, {danger:true, requireText:"RESET", yesLabel:"Reset All Data"});
+  };
+}
+function downloadFile(name, content, type){
+  const blob=new Blob([content],{type}); const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download=name; a.click(); URL.revokeObjectURL(a.href);
+}
+
+checkAuth();
+
+/* ---------- PWA: service worker + install prompt ---------- */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+  });
+}
+let deferredInstallPrompt = null;
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const btn = document.getElementById("installBtn");
+  if (btn) btn.style.display = "inline-block";
+});
+function triggerInstall(){
+  if(!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.finally(()=>{
+    deferredInstallPrompt = null;
+    const btn = document.getElementById("installBtn");
+    if (btn) btn.style.display = "none";
+  });
+}
+</script>
+</body>
+</html>
