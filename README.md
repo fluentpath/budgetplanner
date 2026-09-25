@@ -1,4 +1,4 @@
-# Household Budget Planner — PWA
+# Budget Planner — PWA
 
 A self-contained, installable budget planner. No backend, no build step —
 just static files. Data is stored locally in the browser (`localStorage`),
