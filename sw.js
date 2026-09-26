@@ -1,8 +1,8 @@
-/* Budget Planner — service worker
+/* Snaplet Planner — service worker
    Caches the app shell so it works offline once installed.
    Bump CACHE_NAME any time you change index.html/manifest.json to force
    viewers to pick up the new version. */
-const CACHE_NAME = "budget-planner-v1";
+const CACHE_NAME = "snaplet-planner-pro-v1";
 const APP_SHELL = [
   "./",
   "./index.html",
