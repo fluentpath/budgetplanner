@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Budget Planner</title>
+<title>Budget Planner Pro</title>
 <meta name="description" content="Household budget planner with calendar, monthly & annual views.">
 <meta name="theme-color" content="#4f6ef7">
 <link rel="manifest" href="manifest.json">
@@ -11,12 +12,16 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Budget Planner">
+<meta name="apple-mobile-web-app-title" content="Budget Planner Pro">
 <style>
 :root{
   --bg:#f4f6f9;--card:#fff;--ink:#1c2430;--sub:#6b7686;--line:#e4e8ee;
   --accent:#4f6ef7;--accent-ink:#fff;--green:#1c9d63;--red:#e0483e;--amber:#c98a1f;
   --radius:14px;--shadow:0 1px 2px rgba(20,25,40,.06),0 6px 20px rgba(20,25,40,.05);
+  --p-pink:#ffd9e6;--p-pink-ink:#8a3b5a;--p-peach:#ffe3c9;--p-peach-ink:#8a5a2b;
+  --p-yellow:#fff4c2;--p-yellow-ink:#8a7420;--p-green:#d4f4dd;--p-green-ink:#2f7a4d;
+  --p-blue:#d6ebff;--p-blue-ink:#2f6a99;--p-purple:#e6dcfb;--p-purple-ink:#6a4a99;
+  --p-gray:#f1eef2;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 }
@@ -68,6 +73,30 @@ th{color:var(--sub);font-weight:600;font-size:12px;text-transform:uppercase;}
 .day .dinc{font-size:11.5px;color:var(--green);}
 .day.empty{background:transparent;border:none;cursor:default;}
 .day .dstatus{font-size:10px;color:var(--sub);}
+/* Planner — pastel styling */
+.pcard{border-radius:12px;padding:12px;background:var(--p-gray);}
+.pcard.pink{background:var(--p-pink);color:var(--p-pink-ink);}
+.pcard.peach{background:var(--p-peach);color:var(--p-peach-ink);}
+.pcard.yellow{background:var(--p-yellow);color:var(--p-yellow-ink);}
+.pcard.green{background:var(--p-green);color:var(--p-green-ink);}
+.pcard.blue{background:var(--p-blue);color:var(--p-blue-ink);}
+.pcard.purple{background:var(--p-purple);color:var(--p-purple-ink);}
+.pcard h4{margin:0 0 8px;font-size:13px;letter-spacing:.03em;text-transform:uppercase;}
+.pcard .prow{display:flex;gap:8px;padding:5px 0;border-bottom:1px dashed rgba(0,0,0,.08);font-size:13.5px;}
+.pcard .prow:last-child{border-bottom:none;}
+.pcard .ptime{width:52px;flex-shrink:0;font-weight:700;opacity:.75;font-size:12px;}
+.pweekday-hdr{border-radius:10px 10px 0 0;padding:6px 4px;text-align:center;font-weight:700;font-size:12px;}
+.pweekcol{border-radius:10px;overflow:hidden;background:var(--card);box-shadow:var(--shadow);}
+.pweekcol .pbody{padding:8px;min-height:70px;}
+.board-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;}
+.board-card{position:relative;background:var(--card);border-radius:10px;padding:10px;box-shadow:0 3px 8px rgba(0,0,0,.12);transition:transform .15s;}
+.board-card:hover{transform:rotate(0deg) scale(1.03) !important;z-index:2;}
+.board-card img{width:100%;border-radius:6px;display:block;margin-bottom:6px;}
+.board-cap{font-size:12.5px;min-height:16px;padding-right:56px;}
+.board-note-text{font-size:14px;padding-right:56px;white-space:pre-wrap;}
+.board-sticker{display:flex;align-items:center;justify-content:center;background:transparent;box-shadow:none;padding:4px;min-height:70px;}
+.board-sticker-glyph{font-size:46px;line-height:1;cursor:pointer;}
+
 .modal-bg{position:fixed;inset:0;background:rgba(10,12,18,.5);display:flex;align-items:flex-end;justify-content:center;z-index:100;}
 @media(min-width:640px){.modal-bg{align-items:center;}}
 .modal{background:var(--card);border-radius:16px 16px 0 0;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;padding:18px;}
@@ -91,6 +120,20 @@ th{color:var(--sub);font-weight:600;font-size:12px;text-transform:uppercase;}
 .catgroup h4{margin:0 0 6px;font-size:13px;color:var(--sub);text-transform:uppercase;}
 footer.tag{text-align:center;color:var(--sub);font-size:12px;padding:20px 0 0;}
 input:focus,select:focus,button:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;}
+/* Planner pastel theme */
+.planner-hero{border-radius:18px;padding:18px;background:linear-gradient(135deg,#fdf2f8,#f2f7fd);border:1px solid var(--line);}
+:root[data-theme="dark"] .planner-hero{background:linear-gradient(135deg,#2a2233,#22283a);}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .planner-hero{background:linear-gradient(135deg,#2a2233,#22283a);}}
+.planner-title{font-family:Georgia,serif;letter-spacing:.04em;font-size:20px;text-transform:uppercase;}
+.dow-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px;}
+.dow-chip{border-radius:10px;padding:6px 4px;text-align:center;font-weight:700;font-size:11px;color:#3a3a3a;}
+.pastel-card{border-radius:14px;padding:12px;border:1px solid var(--line);}
+.sched-row{display:grid;grid-template-columns:56px 1fr auto;gap:8px;align-items:start;padding:6px 0;border-bottom:1px dashed var(--line);}
+.sched-hour{font-size:11px;color:var(--sub);padding-top:3px;}
+.todo-line{display:flex;gap:8px;align-items:center;padding:4px 0;border-bottom:1px dotted var(--line);}
+.week-card-head{border-radius:10px 10px 0 0;padding:6px 10px;font-weight:700;font-size:12.5px;margin:-12px -12px 8px -12px;}
+.mday{border-radius:12px;min-height:78px;}
+.mday .mdot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:3px;}
 </style>
 </head>
 <body>
@@ -121,7 +164,7 @@ const DEFAULT_CATS = {
   "Entertainment":["Other"],"Savings":["Other"],"Miscellaneous":["Other"]
 };
 function blankDB(){
-  return { transactions:[], budgets:[], categories:JSON.parse(JSON.stringify(DEFAULT_CATS)), settings:{currency:"PHP", defaultYear:2026, defaultMonth:9, firstDay:"Sun", displayName:""} };
+  return { transactions:[], budgets:[], plannerItems:[], dayNotes:{}, monthNotes:{}, boards:{}, categories:JSON.parse(JSON.stringify(DEFAULT_CATS)), settings:{currency:"PHP", language:"en", defaultYear:2026, defaultMonth:9, firstDay:"Sun", displayName:""} };
 }
 let DB = blankDB(); // replaced with the signed-in account's data once authenticated
 function dataKey(email){ return "hbp_data_v1__"+email; }
@@ -243,23 +286,60 @@ const F = {
     return {months,income:inc,budget:bud,actual:act,savings:inc-act,savingsRate:inc>0?(inc-act)/inc*100:0,variance:bud-act};
   }
 };
+const CURRENCIES = {
+  PHP:"₱",USD:"$",EUR:"€",GBP:"£",JPY:"¥",CNY:"¥",KRW:"₩",INR:"₹",IDR:"Rp",MYR:"RM",
+  SGD:"S$",THB:"฿",VND:"₫",AUD:"A$",CAD:"C$",CHF:"CHF",NZD:"NZ$",HKD:"HK$",TWD:"NT$",
+  AED:"د.إ",SAR:"﷼",QAR:"ر.ق",KWD:"د.ك",BHD:".د.ب",OMR:"﷼",JOD:"د.ا",EGP:"E£",ZAR:"R",
+  NGN:"₦",KES:"KSh",GHS:"₵",BRL:"R$",MXN:"Mex$",ARS:"AR$",CLP:"CL$",COP:"CO$",PEN:"S/",
+  RUB:"₽",UAH:"₴",TRY:"₺",PLN:"zł",SEK:"kr",NOK:"kr",DKK:"kr",CZK:"Kč",HUF:"Ft",RON:"lei",
+  BGN:"лв",ILS:"₪",PKR:"₨",BDT:"৳",LKR:"₨",NPR:"₨",MMK:"K",KHR:"៛",LAK:"₭",
+  BND:"B$",FJD:"FJ$",ISK:"kr"
+};
 function money(n){
   n = Number(n)||0; if(!isFinite(n)) n=0;
-  const sym = DB.settings.currency==="PHP"?"₱":DB.settings.currency==="USD"?"$":DB.settings.currency+" ";
+  const code = DB.settings.currency||"PHP";
+  const sym = CURRENCIES[code] || (code+" ");
   return sym+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 function pct(n){ n=Number(n); if(!isFinite(n)) n=0; return n.toFixed(1)+"%"; }
 
+/* ---------- Language / i18n ---------- */
+const TRANSLATIONS = {
+en:{dashboard:"Dashboard",calendar:"Calendar",planner:"Planner",monthly:"Monthly Expenses",annual:"Annual Budget",history:"History",settings:"Settings",save:"Save",cancel:"Cancel",delete:"Delete",edit:"Edit",addEntry:"Add Entry",income:"Income",expense:"Expense",budgeted:"Budgeted",actual:"Actual",status:"Status",paid:"Paid",pending:"Pending",cancelled:"Cancelled",category:"Category",description:"Description",amount:"Amount",notes:"Notes",daily:"Daily",weekly:"Weekly",monthlyView:"Monthly",tasks:"Tasks",addTask:"+ Add Task",reminder:"Remind me",language:"Language",currency:"Currency",logOut:"Log Out",createAccount:"Create your account",login:"Log In",email:"Email",password:"Password",yourName:"Your Name",today:"Today",dataReset:"All data reset.",title:"Title",time:"Time",type:"Type",task:"Task",event:"Event",complete:"Complete",board:"Snaplet",addPhoto:"+ Add Photo",addNote:"+ Add Note",boardTitle:"Board Title"},
+fil:{dashboard:"Dashboard",calendar:"Kalendaryo",planner:"Planner",monthly:"Buwanang Gastos",annual:"Taunang Badyet",history:"Kasaysayan",settings:"Mga Setting",save:"I-save",cancel:"Kanselahin",delete:"Burahin",edit:"I-edit",addEntry:"+ Magdagdag",income:"Kita",expense:"Gastos",budgeted:"Badyet",actual:"Aktwal",status:"Katayuan",paid:"Bayad na",pending:"Nakabinbin",cancelled:"Kinansela",category:"Kategorya",description:"Paglalarawan",amount:"Halaga",notes:"Tala",daily:"Araw-araw",weekly:"Lingguhan",monthlyView:"Buwanan",tasks:"Gawain",addTask:"+ Magdagdag ng Gawain",reminder:"Paalalahanan ako",language:"Wika",currency:"Pera",logOut:"Mag-log Out",createAccount:"Gumawa ng account",login:"Mag-log In",email:"Email",password:"Password",yourName:"Iyong Pangalan",today:"Ngayon",dataReset:"Nabura na ang lahat ng data.",title:"Pamagat",time:"Oras",type:"Uri",task:"Gawain",event:"Kaganapan",complete:"Tapos na",board:"Snaplet",addPhoto:"+ Magdagdag ng Larawan",addNote:"+ Magdagdag ng Tala",boardTitle:"Pamagat ng Board"},
+zh:{dashboard:"仪表盘",calendar:"日历",planner:"计划表",monthly:"每月支出",annual:"年度预算",history:"历史记录",settings:"设置",save:"保存",cancel:"取消",delete:"删除",edit:"编辑",addEntry:"+ 添加条目",income:"收入",expense:"支出",budgeted:"预算",actual:"实际",status:"状态",paid:"已付款",pending:"待处理",cancelled:"已取消",category:"类别",description:"描述",amount:"金额",notes:"备注",daily:"每日",weekly:"每周",monthlyView:"每月",tasks:"任务",addTask:"+ 添加任务",reminder:"提醒我",language:"语言",currency:"货币",logOut:"退出登录",createAccount:"创建账户",login:"登录",email:"电子邮件",password:"密码",yourName:"您的名字",today:"今天",dataReset:"所有数据已重置。",title:"标题",time:"时间",type:"类型",task:"任务",event:"事件",complete:"完成",board:"Snaplet",addPhoto:"+ 添加照片",addNote:"+ 添加便签",boardTitle:"看板标题"},
+ja:{dashboard:"ダッシュボード",calendar:"カレンダー",planner:"プランナー",monthly:"月間支出",annual:"年間予算",history:"履歴",settings:"設定",save:"保存",cancel:"キャンセル",delete:"削除",edit:"編集",addEntry:"+ 項目を追加",income:"収入",expense:"支出",budgeted:"予算",actual:"実績",status:"状態",paid:"支払済み",pending:"保留中",cancelled:"キャンセル済み",category:"カテゴリー",description:"説明",amount:"金額",notes:"メモ",daily:"日次",weekly:"週次",monthlyView:"月次",tasks:"タスク",addTask:"+ タスクを追加",reminder:"リマインドする",language:"言語",currency:"通貨",logOut:"ログアウト",createAccount:"アカウントを作成",login:"ログイン",email:"メール",password:"パスワード",yourName:"お名前",today:"今日",dataReset:"すべてのデータがリセットされました。",title:"タイトル",time:"時刻",type:"種類",task:"タスク",event:"イベント",complete:"完了",board:"Snaplet",addPhoto:"+ 写真を追加",addNote:"+ メモを追加",boardTitle:"ボードのタイトル"},
+ko:{dashboard:"대시보드",calendar:"캘린더",planner:"플래너",monthly:"월간 지출",annual:"연간 예산",history:"기록",settings:"설정",save:"저장",cancel:"취소",delete:"삭제",edit:"수정",addEntry:"+ 항목 추가",income:"수입",expense:"지출",budgeted:"예산",actual:"실제",status:"상태",paid:"지불됨",pending:"대기중",cancelled:"취소됨",category:"카테고리",description:"설명",amount:"금액",notes:"메모",daily:"일간",weekly:"주간",monthlyView:"월간",tasks:"할 일",addTask:"+ 할 일 추가",reminder:"알림 받기",language:"언어",currency:"통화",logOut:"로그아웃",createAccount:"계정 만들기",login:"로그인",email:"이메일",password:"비밀번호",yourName:"이름",today:"오늘",dataReset:"모든 데이터가 초기화되었습니다.",title:"제목",time:"시간",type:"유형",task:"할 일",event:"이벤트",complete:"완료",board:"Snaplet",addPhoto:"+ 사진 추가",addNote:"+ 메모 추가",boardTitle:"보드 제목"},
+id:{dashboard:"Dasbor",calendar:"Kalender",planner:"Perencana",monthly:"Pengeluaran Bulanan",annual:"Anggaran Tahunan",history:"Riwayat",settings:"Pengaturan",save:"Simpan",cancel:"Batal",delete:"Hapus",edit:"Edit",addEntry:"+ Tambah Entri",income:"Pemasukan",expense:"Pengeluaran",budgeted:"Anggaran",actual:"Aktual",status:"Status",paid:"Lunas",pending:"Tertunda",cancelled:"Dibatalkan",category:"Kategori",description:"Deskripsi",amount:"Jumlah",notes:"Catatan",daily:"Harian",weekly:"Mingguan",monthlyView:"Bulanan",tasks:"Tugas",addTask:"+ Tambah Tugas",reminder:"Ingatkan saya",language:"Bahasa",currency:"Mata Uang",logOut:"Keluar",createAccount:"Buat akun",login:"Masuk",email:"Email",password:"Kata Sandi",yourName:"Nama Anda",today:"Hari Ini",dataReset:"Semua data telah direset.",title:"Judul",time:"Waktu",type:"Jenis",task:"Tugas",event:"Acara",complete:"Selesai",board:"Snaplet",addPhoto:"+ Tambah Foto",addNote:"+ Tambah Catatan",boardTitle:"Judul Papan"},
+ar:{dashboard:"لوحة التحكم",calendar:"التقويم",planner:"المخطط",monthly:"المصروفات الشهرية",annual:"الميزانية السنوية",history:"السجل",settings:"الإعدادات",save:"حفظ",cancel:"إلغاء",delete:"حذف",edit:"تعديل",addEntry:"+ إضافة إدخال",income:"الدخل",expense:"المصروفات",budgeted:"الميزانية",actual:"الفعلي",status:"الحالة",paid:"مدفوع",pending:"معلق",cancelled:"ملغى",category:"الفئة",description:"الوصف",amount:"المبلغ",notes:"ملاحظات",daily:"يومي",weekly:"أسبوعي",monthlyView:"شهري",tasks:"المهام",addTask:"+ إضافة مهمة",reminder:"ذكّرني",language:"اللغة",currency:"العملة",logOut:"تسجيل الخروج",createAccount:"إنشاء حساب",login:"تسجيل الدخول",email:"البريد الإلكتروني",password:"كلمة المرور",yourName:"اسمك",today:"اليوم",dataReset:"تمت إعادة تعيين جميع البيانات.",title:"العنوان",time:"الوقت",type:"النوع",task:"مهمة",event:"حدث",complete:"مكتمل",board:"Snaplet",addPhoto:"+ إضافة صورة",addNote:"+ إضافة ملاحظة",boardTitle:"عنوان اللوحة"},
+de:{dashboard:"Übersicht",calendar:"Kalender",planner:"Planer",monthly:"Monatliche Ausgaben",annual:"Jahresbudget",history:"Verlauf",settings:"Einstellungen",save:"Speichern",cancel:"Abbrechen",delete:"Löschen",edit:"Bearbeiten",addEntry:"+ Eintrag hinzufügen",income:"Einkommen",expense:"Ausgabe",budgeted:"Budgetiert",actual:"Tatsächlich",status:"Status",paid:"Bezahlt",pending:"Ausstehend",cancelled:"Storniert",category:"Kategorie",description:"Beschreibung",amount:"Betrag",notes:"Notizen",daily:"Täglich",weekly:"Wöchentlich",monthlyView:"Monatlich",tasks:"Aufgaben",addTask:"+ Aufgabe hinzufügen",reminder:"Erinnere mich",language:"Sprache",currency:"Währung",logOut:"Abmelden",createAccount:"Konto erstellen",login:"Anmelden",email:"E-Mail",password:"Passwort",yourName:"Dein Name",today:"Heute",dataReset:"Alle Daten wurden zurückgesetzt.",title:"Titel",time:"Uhrzeit",type:"Art",task:"Aufgabe",event:"Termin",complete:"Erledigt",board:"Snaplet",addPhoto:"+ Foto hinzufügen",addNote:"+ Notiz hinzufügen",boardTitle:"Pinnwand-Titel"},
+fr:{dashboard:"Tableau de bord",calendar:"Calendrier",planner:"Agenda",monthly:"Dépenses mensuelles",annual:"Budget annuel",history:"Historique",settings:"Paramètres",save:"Enregistrer",cancel:"Annuler",delete:"Supprimer",edit:"Modifier",addEntry:"+ Ajouter une entrée",income:"Revenu",expense:"Dépense",budgeted:"Budgétisé",actual:"Réel",status:"Statut",paid:"Payé",pending:"En attente",cancelled:"Annulé",category:"Catégorie",description:"Description",amount:"Montant",notes:"Notes",daily:"Quotidien",weekly:"Hebdomadaire",monthlyView:"Mensuel",tasks:"Tâches",addTask:"+ Ajouter une tâche",reminder:"Me rappeler",language:"Langue",currency:"Devise",logOut:"Se déconnecter",createAccount:"Créer un compte",login:"Se connecter",email:"E-mail",password:"Mot de passe",yourName:"Votre nom",today:"Aujourd'hui",dataReset:"Toutes les données ont été réinitialisées.",title:"Titre",time:"Heure",type:"Type",task:"Tâche",event:"Événement",complete:"Terminé",board:"Snaplet",addPhoto:"+ Ajouter une photo",addNote:"+ Ajouter une note",boardTitle:"Titre du tableau"},
+it:{dashboard:"Bacheca",calendar:"Calendario",planner:"Pianificatore",monthly:"Spese Mensili",annual:"Bilancio Annuale",history:"Cronologia",settings:"Impostazioni",save:"Salva",cancel:"Annulla",delete:"Elimina",edit:"Modifica",addEntry:"+ Aggiungi voce",income:"Entrata",expense:"Spesa",budgeted:"Preventivato",actual:"Effettivo",status:"Stato",paid:"Pagato",pending:"In sospeso",cancelled:"Annullato",category:"Categoria",description:"Descrizione",amount:"Importo",notes:"Note",daily:"Giornaliero",weekly:"Settimanale",monthlyView:"Mensile",tasks:"Attività",addTask:"+ Aggiungi attività",reminder:"Ricordamelo",language:"Lingua",currency:"Valuta",logOut:"Disconnetti",createAccount:"Crea account",login:"Accedi",email:"Email",password:"Password",yourName:"Il tuo nome",today:"Oggi",dataReset:"Tutti i dati sono stati reimpostati.",title:"Titolo",time:"Ora",type:"Tipo",task:"Attività",event:"Evento",complete:"Completato",board:"Snaplet",addPhoto:"+ Aggiungi foto",addNote:"+ Aggiungi nota",boardTitle:"Titolo bacheca"},
+es:{dashboard:"Panel",calendar:"Calendario",planner:"Planificador",monthly:"Gastos Mensuales",annual:"Presupuesto Anual",history:"Historial",settings:"Configuración",save:"Guardar",cancel:"Cancelar",delete:"Eliminar",edit:"Editar",addEntry:"+ Agregar entrada",income:"Ingreso",expense:"Gasto",budgeted:"Presupuestado",actual:"Real",status:"Estado",paid:"Pagado",pending:"Pendiente",cancelled:"Cancelado",category:"Categoría",description:"Descripción",amount:"Monto",notes:"Notas",daily:"Diario",weekly:"Semanal",monthlyView:"Mensual",tasks:"Tareas",addTask:"+ Agregar tarea",reminder:"Recordarme",language:"Idioma",currency:"Moneda",logOut:"Cerrar sesión",createAccount:"Crear cuenta",login:"Iniciar sesión",email:"Correo",password:"Contraseña",yourName:"Tu nombre",today:"Hoy",dataReset:"Todos los datos se han restablecido.",title:"Título",time:"Hora",type:"Tipo",task:"Tarea",event:"Evento",complete:"Completado",board:"Snaplet",addPhoto:"+ Agregar foto",addNote:"+ Agregar nota",boardTitle:"Título del tablero"},
+hi:{dashboard:"डैशबोर्ड",calendar:"कैलेंडर",planner:"प्लानर",monthly:"मासिक खर्च",annual:"वार्षिक बजट",history:"इतिहास",settings:"सेटिंग्स",save:"सहेजें",cancel:"रद्द करें",delete:"हटाएं",edit:"संपादित करें",addEntry:"+ प्रविष्टि जोड़ें",income:"आय",expense:"खर्च",budgeted:"बजट",actual:"वास्तविक",status:"स्थिति",paid:"भुगतान किया",pending:"लंबित",cancelled:"रद्द",category:"श्रेणी",description:"विवरण",amount:"राशि",notes:"टिप्पणियाँ",daily:"दैनिक",weekly:"साप्ताहिक",monthlyView:"मासिक",tasks:"कार्य",addTask:"+ कार्य जोड़ें",reminder:"मुझे याद दिलाएं",language:"भाषा",currency:"मुद्रा",logOut:"लॉग आउट",createAccount:"खाता बनाएं",login:"लॉग इन",email:"ईमेल",password:"पासवर्ड",yourName:"आपका नाम",today:"आज",dataReset:"सभी डेटा रीसेट कर दिया गया है।",title:"शीर्षक",time:"समय",type:"प्रकार",task:"कार्य",event:"घटना",complete:"पूर्ण",board:"Snaplet",addPhoto:"+ फोटो जोड़ें",addNote:"+ नोट जोड़ें",boardTitle:"बोर्ड शीर्षक"}
+};
+function t(key){
+  const lang = (DB.settings && DB.settings.language) || "en";
+  return (TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) || TRANSLATIONS.en[key] || key;
+}
+function applyDir(){
+  document.documentElement.dir = (DB.settings && DB.settings.language==="ar") ? "rtl" : "ltr";
+  document.documentElement.lang = (DB.settings && DB.settings.language) || "en";
+}
+
 /* ---------- State ---------- */
 let view = DB.settings.defaultYear ? "dashboard":"dashboard";
 let curYear = DB.settings.defaultYear||2026, curMonth = DB.settings.defaultMonth||9;
+let plannerView = "daily", plannerDate = todayISO();
+function todayISO(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
 
 /* ---------- Nav & topbar ---------- */
-const NAVS=[["dashboard","Dashboard"],["calendar","Calendar"],["monthly","Monthly Expenses"],["annual","Annual Budget"],["history","History"],["settings","Settings"]];
+const NAVS=[["dashboard","dashboard"],["planner","planner"],["monthly","monthly"],["annual","annual"],["history","history"],["settings","settings"]];
 function renderNav(){
+  applyDir();
   document.getElementById("header").style.display="";
-  document.getElementById("nav").innerHTML = NAVS.map(([k,l])=>`<button data-v="${k}" class="${view===k?'active':''}">${l}</button>`).join("");
+  document.getElementById("nav").innerHTML = NAVS.map(([k,l])=>`<button data-v="${k}" class="${view===k?'active':''}">${t(l)}</button>`).join("");
   document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{ view=b.dataset.v; renderAll(); });
   const dn = DB.settings.displayName;
   document.getElementById("brandTitle").textContent = dn ? `🏠 ${dn}'s Budget Planner` : "🏠 Budget Planner";
@@ -271,8 +351,17 @@ function renderTopSelects(){
   const years=[]; for(let yy=2026; yy<=2040; yy++) years.push(yy);
   if(!years.includes(curYear)) years.push(curYear);
   ys.innerHTML = years.sort((a,b)=>a-b).map(y=>`<option value="${y}" ${y===curYear?'selected':''}>${y}</option>`).join("");
-  ms.onchange=()=>{ curMonth=Number(ms.value); renderAll(); };
-  ys.onchange=()=>{ curYear=Number(ys.value); renderAll(); };
+  ms.onchange=()=>{ curMonth=Number(ms.value); syncPlannerToTopMonth(); renderAll(); };
+  ys.onchange=()=>{ curYear=Number(ys.value); syncPlannerToTopMonth(); renderAll(); };
+}
+function syncPlannerToTopMonth(){
+  // Keep the Planner's Daily/Weekly/Monthly views following the top month/year picker.
+  // The underlying data is always safe either way — every planner item is stored against
+  // its own exact date and is never deleted by switching months; this only changes what's
+  // currently being *viewed*, so October shows empty until you add something there, and
+  // September's items are exactly where you left them when you switch back.
+  const day = Math.min(Number(plannerDate.split("-")[2]), daysInMonth(curYear,curMonth));
+  plannerDate = `${curYear}-${String(curMonth).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
 }
 
 /* ---------- Toast ---------- */
@@ -291,18 +380,13 @@ function renderDashboard(){
   Object.keys(bcats).forEach(c=>{ if((cats[c]||0) > bcats[c]) alerts+=`<div class="alertbox bad">⚠ ${c} spending has exceeded budget by ${money(cats[c]-bcats[c])}.</div>`; });
   if(pend>0) alerts+=`<div class="alertbox warn">🕒 ${F.txForMonth(y,m).filter(t=>isExpenseType(t)&&t.status==='pending').length} pending expense(s) totaling ${money(pend)}.</div>`;
   if(sav>0) alerts+=`<div class="alertbox good">💰 You are currently saving ${money(sav)} this month (${pct(rate)}).</div>`;
+  const stat=[["Income",inc,"green","☀️"],["Budgeted Expenses",bud,"blue","🌍"],["Actual Expenses",act,"peach","⛰️"],["Pending Expenses",pend,"yellow","🌙"],["Remaining Budget",rem,"purple","💎"],["Savings",sav,"pink","🌸"],["Savings Rate",rate,"green","⭐"]];
   return `
-  <div class="section"><h2>${MONTHS[m-1]} ${y}</h2>
+  <div class="section"><h2>🌈 ${MONTHS[m-1]} ${y}</h2>
   <div class="cards">
-    <div class="card"><div class="label">Income</div><div class="val">${money(inc)}</div></div>
-    <div class="card"><div class="label">Budgeted Expenses</div><div class="val">${money(bud)}</div></div>
-    <div class="card"><div class="label">Actual Expenses</div><div class="val">${money(act)}</div></div>
-    <div class="card"><div class="label">Pending Expenses</div><div class="val">${money(pend)}</div></div>
-    <div class="card"><div class="label">Remaining Budget</div><div class="val">${money(rem)}</div></div>
-    <div class="card"><div class="label">Savings</div><div class="val">${money(sav)}</div></div>
-    <div class="card"><div class="label">Savings Rate</div><div class="val">${pct(rate)}</div></div>
+    ${stat.map(([label,val,color,icon])=>`<div class="card pcard ${color}"><div class="label">${icon} ${label}</div><div class="val">${label==="Savings Rate"?pct(val):money(val)}</div></div>`).join("")}
   </div></div>
-  <div class="section">${alerts||'<div class="alertbox good">No alerts — everything looks on track.</div>'}</div>
+  <div class="section">${alerts||'<div class="alertbox good">😊 No alerts — everything looks on track.</div>'}</div>
   `;
 }
 
@@ -314,11 +398,12 @@ function renderCalendar(){
   let cells = Array(first).fill('<div class="day empty"></div>');
   for(let d=1; d<=dim; d++){
     const dateStr = `${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const dow = new Date(dateStr+"T00:00:00").getDay();
     const entries = DB.transactions.filter(t=>t.date===dateStr);
     const exp = entries.filter(isExpenseType).reduce((s,t)=>s+t.amount,0);
     const inc = entries.filter(t=>t.type==="income").reduce((s,t)=>s+t.amount,0);
     const allPaid = entries.length && entries.every(t=>t.status==="paid");
-    cells.push(`<div class="day" data-d="${dateStr}">
+    cells.push(`<div class="day" data-d="${dateStr}" style="background:${PASTELS[dow]}22;">
       <div class="dnum">${d}</div>
       ${exp?`<div class="damt">-${money(exp)}</div>`:""}
       ${inc?`<div class="dinc">+${money(inc)}</div>`:""}
@@ -326,7 +411,7 @@ function renderCalendar(){
     </div>`);
   }
   return `<div class="section">
-    <div class="spread"><h2>${MONTHS[m-1]} ${y}</h2>
+    <div class="spread"><h2>📅 ${MONTHS[m-1]} ${y}</h2>
       <div class="row">
         <button class="btn ghost sm" id="prevM">‹ Prev</button>
         <button class="btn ghost sm" id="nextM">Next ›</button>
@@ -362,7 +447,7 @@ function renderMonthly(){
     });
     catBlocks+=`<div class="catgroup"><h4>${cat}</h4><div class="tblwrap"><table><tr><th>Subcategory</th><th class="right">Budgeted</th><th class="right">Actual</th><th class="right">Difference</th></tr>${rows}</table></div></div>`;
   });
-  return `<div class="section"><h2>Monthly Expenses — ${MONTHS[m-1]} ${y}</h2>
+  return `<div class="section"><h2>💎 Monthly Expenses — ${MONTHS[m-1]} ${y}</h2>
     <h3 style="margin-top:14px;">Income</h3>
     <div class="tblwrap"><table><tr><th>Source</th><th class="right">Amount</th></tr>${incRows}
       <tr><td><b>TOTAL</b></td><td class="right"><b>${money(inc)}</b></td></tr></table></div>
@@ -390,7 +475,7 @@ function renderAnnual(){
   for(let m=1;m<=12;m++){ const c=F.categoryTotals(y,m,"actual"); Object.keys(c).forEach(k=>cats[k]=(cats[k]||0)+c[k]); }
   const maxCat = Math.max(1,...Object.values(cats));
   const catRows = Object.entries(cats).sort((x,z)=>z[1]-x[1]).map(([k,v])=>`<div style="margin-bottom:8px;"><div class="spread"><span>${k}</span><span>${money(v)}</span></div><div class="bar"><div style="width:${(v/maxCat*100).toFixed(0)}%"></div></div></div>`).join("") || '<p style="color:var(--sub)">No data yet.</p>';
-  return `<div class="section"><h2>Annual Budget — ${y}</h2>
+  return `<div class="section"><h2>⭐ Annual Budget — ${y}</h2>
     <div class="tblwrap"><table><tr><th>Month</th><th class="right">Income</th><th class="right">Budget</th><th class="right">Actual</th><th class="right">Remaining</th><th class="right">Savings</th></tr>
     ${rows}<tr><td><b>TOTAL</b></td><td class="right"><b>${money(a.income)}</b></td><td class="right"><b>${money(a.budget)}</b></td><td class="right"><b>${money(a.actual)}</b></td><td class="right"><b>${money(a.income-a.actual)}</b></td><td class="right"><b>${money(a.savings)}</b></td></tr></table></div>
   </div>
@@ -402,13 +487,280 @@ function renderAnnual(){
   <div class="section"><h3>Annual Expense Breakdown (Actual)</h3>${catRows}</div>`;
 }
 
+/* ---------- Planner ---------- */
+function plannerForDate(d){ return DB.plannerItems.filter(p=>p.date===d).sort((a,b)=>(a.time||"99:99").localeCompare(b.time||"99:99")); }
+function weekStart(d){ const dt=new Date(d+"T00:00:00"); dt.setDate(dt.getDate()-dt.getDay()); return dt; }
+function addDays(d,n){ const dt=new Date(d+"T00:00:00"); dt.setDate(dt.getDate()+n); return dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0"); }
+const PASTELS = ["#ffd6e0","#ffe8c2","#eaf5c0","#c8f0df","#c7e9f5","#dcd0f5","#ffd0d8"]; // Sun..Sat
+function renderPlanner(){
+  const subnav = `<div class="row" style="margin-bottom:10px;">
+    ${[["daily","daily"],["weekly","weekly"],["monthly","monthlyView"],["tasks","tasks"],["board","board"]].map(([k,l])=>`<button class="btn ${plannerView===k?'':'ghost'} sm plview" data-pv="${k}">${t(l)}</button>`).join("")}
+  </div>`;
+  let body;
+  if(plannerView==="tasks") body = renderTasksList();
+  else if(plannerView==="weekly") body = renderWeekly();
+  else if(plannerView==="monthly") body = renderPlannerMonth();
+  else if(plannerView==="board") body = renderBoard();
+  else body = renderDailyGrid();
+  return `<div class="planner-hero"><div class="planner-title">✨ ${t("planner")}</div>${subnav}${body}</div>`;
+}
+function renderDailyGrid(){
+  const items = plannerForDate(plannerDate);
+  const tasksToday = items.filter(it=>it.type==="task");
+  const eventsToday = items.filter(it=>it.type!=="task");
+  const dow = new Date(plannerDate+"T00:00:00").getDay();
+  const startHour = (DB.settings.dayStartHour!=null) ? DB.settings.dayStartHour : 6;
+  const hours = Array.from({length:24},(_,i)=>(startHour+i)%24); // wraps around midnight for shift workers
+  const rows = hours.map(h=>{
+    const hh = String(h).padStart(2,"0");
+    const here = eventsToday.filter(it=>(it.time||"").startsWith(hh));
+    const label = h===0?"12 AM":(h<12?`${h} AM`:(h===12?"12 PM":`${h-12} PM`));
+    return `<div class="sched-row">
+      <div class="sched-hour">${label}</div>
+      <div>${here.map(it=>`<div style="${it.completed?'text-decoration:line-through;color:var(--sub);':''}">${it.title}${it.notes?` <span class="sub">— ${it.notes}</span>`:""}</div>`).join("") || ""}</div>
+      <button class="btn ghost sm plan-add" data-date="${plannerDate}" data-time="${hh}:00" style="padding:2px 8px;">+</button>
+    </div>`;
+  }).join("");
+  const notesVal = (DB.dayNotes && DB.dayNotes[plannerDate]) || "";
+  return `<div class="spread" style="margin-top:6px;"><button class="btn ghost sm" id="planPrevDay">‹</button><h3 style="margin:0;">${plannerDate}</h3><button class="btn ghost sm" id="planNextDay">›</button></div>
+  <div class="grid2" style="margin-top:10px;">
+    <div class="pastel-card" style="background:${PASTELS[dow]}22;">
+      <div style="font-weight:700;">📅 ${t("daily")}</div>
+      <div style="max-height:52vh;overflow-y:auto;margin-top:6px;">${rows}</div>
+    </div>
+    <div>
+      <div class="pastel-card" style="background:${PASTELS[(dow+3)%7]}22;margin-bottom:10px;">
+        <div class="spread"><span style="font-weight:700;">✓ ${t("tasks")}</span><button class="btn ghost sm addTaskForDay" data-date="${plannerDate}">${t("addTask")}</button></div>
+        ${tasksToday.map(it=>`<div class="todo-line"><input type="checkbox" class="task-done" data-id="${it.id}" ${it.completed?'checked':''}><span style="flex:1;${it.completed?'text-decoration:line-through;color:var(--sub);':''}">${it.title}</span><button class="btn ghost sm plan-edit" data-id="${it.id}">${t("edit")}</button></div>`).join("") || `<div style="color:var(--sub);font-size:13px;">—</div>`}
+      </div>
+      <div class="pastel-card" style="background:${PASTELS[(dow+5)%7]}22;">
+        <div style="font-weight:700;margin-bottom:6px;">📝 ${t("notes")}</div>
+        <textarea id="dayNotesBox" data-date="${plannerDate}" style="width:100%;min-height:70px;background:transparent;border:none;resize:vertical;">${notesVal}</textarea>
+      </div>
+    </div>
+  </div>`;
+}
+function renderWeekly(){
+  const start = weekStart(plannerDate);
+  const startStr = start.getFullYear()+"-"+String(start.getMonth()+1).padStart(2,"0")+"-"+String(start.getDate()).padStart(2,"0");
+  const days = Array.from({length:7},(_,i)=>addDays(startStr,i));
+  const dowNames=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const cols = days.map((d,i)=>{
+    const items = plannerForDate(d);
+    return `<div class="pastel-card" style="background:var(--card);">
+      <div class="week-card-head" style="background:${PASTELS[i]};">${dowNames[i]} <span style="font-weight:400;opacity:.75;">${d.slice(5)}</span></div>
+      ${items.map(it=>`<div class="todo-line" style="border-bottom:1px dotted var(--line);"><span style="flex:1;${it.completed?'text-decoration:line-through;color:var(--sub);':''}">${it.time?`<b>${it.time}</b> `:'• '}${it.title}</span></div>`).join("") || `<div style="color:var(--sub);font-size:12px;padding:4px 0;">—</div>`}
+      <button class="btn ghost sm plan-add" data-date="${d}" data-time="" style="margin-top:8px;">+</button>
+    </div>`;
+  }).join("");
+  return `<div class="spread" style="margin-top:6px;"><button class="btn ghost sm" id="planPrevWeek">‹</button><h3 style="margin:0;">${days[0]} – ${days[6]}</h3><button class="btn ghost sm" id="planNextWeek">›</button></div>
+  <div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:10px;">${cols}</div>`;
+}
+function renderPlannerMonth(){
+  const [y,m] = plannerDate.split("-").map(Number);
+  const first = new Date(y,m-1,1).getDay();
+  const dim = daysInMonth(y,m);
+  let cells = Array(first).fill('<div class="day empty"></div>');
+  for(let d=1; d<=dim; d++){
+    const ds = `${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const items = plannerForDate(ds);
+    const dow = new Date(ds+"T00:00:00").getDay();
+    cells.push(`<div class="day mday plan-day" data-d="${ds}" style="background:${PASTELS[dow]}18;"><div class="dnum">${d}</div>${items.slice(0,3).map(it=>`<div style="font-size:10px;"><span class="mdot" style="background:${PASTELS[dow]};"></span>${it.title.slice(0,10)}</div>`).join("")}${items.length>3?`<div style="font-size:10px;color:var(--sub);">+${items.length-3} more</div>`:""}</div>`);
+  }
+  const key = `${y}-${String(m).padStart(2,"0")}`;
+  const mn = (DB.monthNotes && DB.monthNotes[key]) || {notes:"",priorities:""};
+  return `<div class="spread" style="margin-top:6px;"><button class="btn ghost sm" id="planPrevM">‹</button><h3 style="margin:0;">${MONTHS[m-1]} ${y}</h3><button class="btn ghost sm" id="planNextM">›</button></div>
+  <div class="dow-strip">${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d,i)=>`<div class="dow-chip" style="background:${PASTELS[i]};">${d}</div>`).join("")}</div>
+  <div class="calgrid" style="grid-template-columns:repeat(7,1fr);">${cells.join("")}</div>
+  <div class="grid2" style="margin-top:14px;">
+    <div class="pastel-card"><div style="font-weight:700;margin-bottom:6px;">${t("notes")}</div><textarea id="monthNotesBox" data-key="${key}" data-field="notes" style="width:100%;min-height:60px;background:transparent;border:none;resize:vertical;">${mn.notes}</textarea></div>
+    <div class="pastel-card"><div style="font-weight:700;margin-bottom:6px;">Priorities</div><textarea id="monthPrioBox" data-key="${key}" data-field="priorities" style="width:100%;min-height:60px;background:transparent;border:none;resize:vertical;">${mn.priorities}</textarea></div>
+  </div>`;
+}
+function renderTasksList(){
+  const tasks = DB.plannerItems.filter(p=>p.type==="task").sort((a,b)=>(a.completed?1:0)-(b.completed?1:0) || (a.date||"").localeCompare(b.date||""));
+  return `<button class="btn sm" id="addTaskBtn">${t("addTask")}</button>
+  <div class="pastel-card" style="margin-top:10px;background:var(--card);">${tasks.map((it,i)=>`
+    <div class="todo-line"><input type="checkbox" class="task-done" data-id="${it.id}" ${it.completed?'checked':''}><span style="flex:1;${it.completed?'text-decoration:line-through;color:var(--sub);':''}">${it.title}</span>${it.date?`<span class="sub" style="margin-right:6px;">${it.date}${it.time?' '+it.time:''}</span>`:""}<button class="btn ghost sm plan-edit" data-id="${it.id}">${t("edit")}</button><button class="btn ghost sm plan-del" data-id="${it.id}">${t("delete")}</button></div>`).join("") || `<p style="color:var(--sub)">—</p>`}</div>`;
+}
+
+/* ---------- Board (memory / vision board) ---------- */
+/* ---------- Board (memory / vision board) — one board per calendar month ---------- */
+const BOARD_COLORS = ["pink","peach","yellow","green","blue","purple"];
+function boardKey(y,m){ return `${y}-${String(m).padStart(2,"0")}`; }
+function currentBoard(){
+  if(!DB.boards) DB.boards={};
+  // one-time migration from an earlier single-board version, if present
+  if(DB.board){ const k0=boardKey(curYear,curMonth); if(!DB.boards[k0]) DB.boards[k0]=DB.board; delete DB.board; }
+  const k = boardKey(curYear,curMonth);
+  if(!DB.boards[k]) DB.boards[k] = {title:"Snaplet", items:[]};
+  return DB.boards[k];
+}
+function renderBoard(){
+  const b = currentBoard();
+  const cards = b.items.map((it,i)=>{
+    const rot = (it.rotation!=null) ? it.rotation : 0;
+    if(it.type==="photo"){
+      return `<div class="board-card" style="transform:rotate(${rot}deg);">
+        <img src="${it.dataUrl}" alt="">
+        <div class="board-cap" data-id="${it.id}">${(it.caption||"").replace(/</g,"&lt;")||`<span style="color:var(--sub);">${t("description")}…</span>`}</div>
+        <button class="btn ghost sm board-edit" data-id="${it.id}" style="position:absolute;top:6px;right:32px;padding:2px 6px;">${t("edit")}</button>
+        <button class="btn ghost sm board-del" data-id="${it.id}" style="position:absolute;top:6px;right:6px;padding:2px 6px;">✕</button>
+      </div>`;
+    }
+    if(it.type==="sticker"){
+      return `<div class="board-card board-sticker" style="transform:rotate(${rot}deg);" data-id="${it.id}">
+        <button class="btn ghost sm board-del" data-id="${it.id}" style="position:absolute;top:2px;right:2px;padding:1px 5px;">✕</button>
+        <div class="board-sticker-glyph board-sticker-swap" data-id="${it.id}">${it.emoji}</div>
+      </div>`;
+    }
+    return `<div class="board-card pcard ${it.color||'yellow'}" style="transform:rotate(${rot}deg);min-height:120px;">
+      <div class="board-note-text" data-id="${it.id}">${(it.text||"").replace(/</g,"&lt;")||`<span style="opacity:.6;">${t("addNote")}…</span>`}</div>
+      <button class="btn ghost sm board-edit" data-id="${it.id}" style="position:absolute;top:6px;right:32px;padding:2px 6px;">${t("edit")}</button>
+      <button class="btn ghost sm board-del" data-id="${it.id}" style="position:absolute;top:6px;right:6px;padding:2px 6px;">✕</button>
+    </div>`;
+  }).join("");
+  return `
+  <input type="text" id="boardTitleInput" value="${b.title.replace(/"/g,'&quot;')}" placeholder="${t("boardTitle")}"
+    style="font-size:22px;font-weight:700;border:none;background:transparent;width:100%;margin-bottom:12px;color:var(--ink);">
+  <div class="row" style="margin-bottom:14px;">
+    <button class="btn sm" id="boardAddPhotoBtn">📷 ${t("addPhoto")}</button>
+    <input type="file" id="boardPhotoInput" accept="image/*" style="display:none;">
+    <button class="btn ghost sm" id="boardAddNoteBtn">📝 ${t("addNote")}</button>
+    <button class="btn ghost sm" id="boardAddStickerBtn">✨ ${t("addSticker")}</button>
+  </div>
+  <div class="board-grid">${cards || `<p style="color:var(--sub)">—</p>`}</div>`;
+}
+function resizeImageFile(file, maxDim){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = ()=>{
+        let w=img.width, h=img.height;
+        if(w>maxDim || h>maxDim){ const scale=maxDim/Math.max(w,h); w=Math.round(w*scale); h=Math.round(h*scale); }
+        const canvas = document.createElement("canvas");
+        canvas.width=w; canvas.height=h;
+        canvas.getContext("2d").drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL("image/jpeg", 0.82));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+const BOARD_STICKERS = ["☀️","☁️","🌍","⛰️","🌙","🌈","🌸","💎","😊","⭐","🐝","❤️"];
+function openStickerPicker(swapId){
+  const html=`<div class="modal-bg" id="stickerFormBg"><div class="modal">
+    <div class="spread"><h2>${t("addSticker")}</h2><button class="close" id="stickerFormClose">✕</button></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+      ${BOARD_STICKERS.map(e=>`<button type="button" class="sticker-pick" data-emoji="${e}" style="font-size:32px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);cursor:pointer;">${e}</button>`).join("")}
+    </div>
+  </div></div>`;
+  document.body.insertAdjacentHTML("beforeend", html);
+  document.getElementById("stickerFormClose").onclick=()=>document.getElementById("stickerFormBg").remove();
+  document.querySelectorAll(".sticker-pick").forEach(b=>b.onclick=()=>{
+    const emoji=b.dataset.emoji;
+    if(swapId){ const it=currentBoard().items.find(x=>x.id===swapId); if(it) it.emoji=emoji; }
+    else { currentBoard().items.push({id:uid(), type:"sticker", emoji, rotation:Math.round(Math.random()*16-8), createdAt:nowISO()}); }
+    save(); document.getElementById("stickerFormBg").remove(); renderAll();
+  });
+}
+
+function openNoteForm(id){
+  const it = id ? currentBoard().items.find(x=>x.id===id) : null;
+  const html=`<div class="modal-bg" id="noteFormBg"><div class="modal">
+    <div class="spread"><h2>${t("addNote")}</h2><button class="close" id="noteFormClose">✕</button></div>
+    <div class="field"><label>${t("notes")}</label><textarea id="nfText" style="min-height:90px;">${it?it.text||'':''}</textarea></div>
+    <div class="field"><label>${t("category")}</label><div class="row">${BOARD_COLORS.map(c=>`<button type="button" class="nf-color pcard ${c}" data-color="${c}" style="width:30px;height:30px;padding:0;border:2px solid ${it&&it.color===c?'var(--ink)':'transparent'};"></button>`).join("")}</div></div>
+    <div class="row"><button class="btn" id="nfSave">${t("save")}</button>${it?`<button class="btn danger" id="nfDelete">${t("delete")}</button>`:""}<button class="btn ghost" id="nfCancel">${t("cancel")}</button></div>
+  </div></div>`;
+  document.body.insertAdjacentHTML("beforeend", html);
+  let chosenColor = it ? (it.color||"yellow") : BOARD_COLORS[Math.floor(Math.random()*BOARD_COLORS.length)];
+  document.querySelectorAll(".nf-color").forEach(b=>b.onclick=()=>{ chosenColor=b.dataset.color; document.querySelectorAll(".nf-color").forEach(x=>x.style.border="2px solid transparent"); b.style.border="2px solid var(--ink)"; });
+  document.getElementById("noteFormClose").onclick=()=>document.getElementById("noteFormBg").remove();
+  document.getElementById("nfCancel").onclick=()=>document.getElementById("noteFormBg").remove();
+  const delBtn=document.getElementById("nfDelete"); if(delBtn) delBtn.onclick=()=>{
+    showConfirm(t("delete")+"?", ()=>{ currentBoard().items=currentBoard().items.filter(x=>x.id!==id); save(); document.getElementById("noteFormBg").remove(); renderAll(); }, {danger:true, yesLabel:t("delete")});
+  };
+  document.getElementById("nfSave").onclick=()=>{
+    const text = document.getElementById("nfText").value.trim();
+    if(!text){ toast("Note text required.", true); return; }
+    if(it){ it.text=text; it.color=chosenColor; }
+    else { currentBoard().items.push({id:uid(), type:"note", text, color:chosenColor, rotation:Math.round(Math.random()*10-5), createdAt:nowISO()}); }
+    save(); document.getElementById("noteFormBg").remove(); renderAll(); toast(t("save")+"!");
+  };
+}
+function openPhotoCaptionForm(id){
+  const it = currentBoard().items.find(x=>x.id===id);
+  if(!it) return;
+  const html=`<div class="modal-bg" id="capFormBg"><div class="modal">
+    <div class="spread"><h2>${t("edit")}</h2><button class="close" id="capFormClose">✕</button></div>
+    <img src="${it.dataUrl}" style="width:100%;border-radius:8px;margin-bottom:10px;">
+    <div class="field"><label>${t("description")}</label><input type="text" id="capText" value="${(it.caption||'').replace(/"/g,'&quot;')}"></div>
+    <div class="row"><button class="btn" id="capSave">${t("save")}</button><button class="btn danger" id="capDelete">${t("delete")}</button><button class="btn ghost" id="capCancel">${t("cancel")}</button></div>
+  </div></div>`;
+  document.body.insertAdjacentHTML("beforeend", html);
+  document.getElementById("capFormClose").onclick=()=>document.getElementById("capFormBg").remove();
+  document.getElementById("capCancel").onclick=()=>document.getElementById("capFormBg").remove();
+  document.getElementById("capDelete").onclick=()=>{
+    showConfirm(t("delete")+"?", ()=>{ currentBoard().items=currentBoard().items.filter(x=>x.id!==id); save(); document.getElementById("capFormBg").remove(); renderAll(); }, {danger:true, yesLabel:t("delete")});
+  };
+  document.getElementById("capSave").onclick=()=>{
+    it.caption = document.getElementById("capText").value.trim();
+    save(); document.getElementById("capFormBg").remove(); renderAll(); toast(t("save")+"!");
+  };
+}
+
+
+let editingPlanId=null;
+function openPlanForm(date,time,id){
+  editingPlanId=id||null;
+  const it = editingPlanId ? DB.plannerItems.find(x=>x.id===editingPlanId) : null;
+  const fixedTime = !it && !!time; // opened from a specific hour's "+" — time is already known, no need to re-enter it
+  const timeField = fixedTime
+    ? `<div class="field"><label>${t("time")}</label><div style="padding:9px 10px;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--sub);">${time}</div></div>`
+    : `<div class="field"><label>${t("time")}</label><input type="time" id="pfTime" value="${it?(it.time||''):''}"></div>`;
+  const html=`<div class="modal-bg" id="planFormBg"><div class="modal">
+    <div class="spread"><h2>${it?t("edit"):t("addEntry")}</h2><button class="close" id="planFormClose">✕</button></div>
+    <div class="field"><label>${t("title")}</label><input type="text" id="pfTitle" value="${it?it.title.replace(/"/g,'&quot;'):''}"></div>
+    <div class="grid2">
+      <div class="field"><label>Date</label><input type="date" id="pfDate" value="${it?it.date:(date||plannerDate)}"></div>
+      ${timeField}
+    </div>
+    <div class="field"><label>${t("type")}</label><select id="pfType"><option value="task" ${(it?it.type:(time?"":"task"))==='task'?'selected':''}>${t("task")}</option><option value="event" ${(it?it.type:(time?"event":""))==='event'?'selected':''}>${t("event")}</option></select></div>
+    <div class="field"><label>${t("notes")}</label><textarea id="pfNotes">${it?it.notes||'':''}</textarea></div>
+    <label style="display:flex;gap:8px;align-items:center;margin-bottom:10px;"><input type="checkbox" id="pfReminder" ${it&&it.reminder?'checked':''}> ${t("reminder")}</label>
+    <div class="row"><button class="btn" id="pfSave">${t("save")}</button>${it?`<button class="btn danger" id="pfDelete">${t("delete")}</button>`:""}<button class="btn ghost" id="pfCancel">${t("cancel")}</button></div>
+  </div></div>`;
+  document.body.insertAdjacentHTML("beforeend", html);
+  document.getElementById("planFormClose").onclick=()=>document.getElementById("planFormBg").remove();
+  document.getElementById("pfCancel").onclick=()=>document.getElementById("planFormBg").remove();
+  const delBtn=document.getElementById("pfDelete"); if(delBtn) delBtn.onclick=()=>{
+    showConfirm(`${t("delete")} "${it.title}"?`, ()=>{ DB.plannerItems=DB.plannerItems.filter(x=>x.id!==editingPlanId); save(); document.getElementById("planFormBg").remove(); renderAll(); }, {danger:true, yesLabel:t("delete")});
+  };
+  document.getElementById("pfSave").onclick=()=>{
+    const title=document.getElementById("pfTitle").value.trim();
+    if(!title){ toast("Title required.", true); return; }
+    const timeVal = fixedTime ? time : document.getElementById("pfTime").value.trim();
+    const data={ title, date:document.getElementById("pfDate").value, time:timeVal,
+      type:document.getElementById("pfType").value, notes:document.getElementById("pfNotes").value,
+      reminder:document.getElementById("pfReminder").checked, updatedAt:nowISO() };
+    if(editingPlanId){ const cur=DB.plannerItems.find(x=>x.id===editingPlanId); Object.assign(cur,data); cur.notified=false; }
+    else { DB.plannerItems.push({id:uid(), completed:false, notified:false, createdAt:nowISO(), ...data}); }
+    save(); document.getElementById("planFormBg").remove(); renderAll(); toast(t("save")+"!");
+  };
+}
+
 function renderHistory(){
   const years = [...new Set(DB.transactions.map(t=>t.year))].sort((a,b)=>b-a);
   const tree = years.map(y=>{
     const months = [...new Set(DB.transactions.filter(t=>t.year===y).map(t=>t.month))].sort((a,b)=>a-b);
     return `<div style="margin-bottom:10px;"><b>${y}</b><div class="row" style="margin-top:4px;">${months.map(m=>`<button class="btn ghost sm hist-jump" data-y="${y}" data-m="${m}">${MONTHS[m-1]}</button>`).join("")}</div></div>`;
   }).join("") || '<p style="color:var(--sub)">No history yet.</p>';
-  return `<div class="section"><h2>History</h2>
+  return `<div class="section"><h2>🌙 History</h2>
     <div class="field"><label>Search transactions</label><input type="text" id="histSearch" placeholder="e.g. Electricity"></div>
     <div class="row">
       <select id="filtType"><option value="">All types</option><option value="expense">Expense</option><option value="income">Income</option></select>
@@ -433,7 +785,7 @@ function runHistSearch(){
 
 function renderSettings(){
   const currentEmail = localStorage.getItem(CURRENT_EMAIL_KEY);
-  return `<div class="section"><h2>Settings</h2>
+  return `<div class="section"><h2>⚙️ Settings</h2>
   <h3>Account</h3>
   <div class="field"><label>Title Name (shown as "&lt;name&gt;'s Budget Planner")</label>
     <div class="row"><input type="text" id="setDisplayName" value="${(DB.settings.displayName||"").replace(/"/g,'&quot;')}" placeholder="Your name"><button class="btn ghost sm" id="saveDisplayName">Save</button></div>
@@ -443,12 +795,25 @@ function renderSettings(){
   </div>
   <div class="section"><h3 style="margin-top:0;">General</h3>
   <div class="grid2">
-    <div class="field"><label>Currency</label><select id="setCurrency">
-      <option value="PHP" ${DB.settings.currency==="PHP"?"selected":""}>PHP (₱)</option>
-      <option value="USD" ${DB.settings.currency==="USD"?"selected":""}>USD ($)</option>
+    <div class="field"><label>${t("currency")}</label><select id="setCurrency">
+      ${Object.keys(CURRENCIES).sort().map(c=>`<option value="${c}" ${DB.settings.currency===c?"selected":""}>${c} (${CURRENCIES[c]})</option>`).join("")}
     </select></div>
-    <div class="field"><label>Default Month/Year</label><div class="row"><span>${MONTHS[curMonth-1]} ${curYear} (current view)</span></div></div>
-  </div></div>
+    <div class="field"><label>${t("language")}</label><select id="setLanguage">
+      ${[["en","English"],["fil","Filipino"],["zh","中文 (Mandarin)"],["ja","日本語"],["ko","한국어"],["id","Bahasa Indonesia"],["ar","العربية"],["de","Deutsch"],["fr","Français"],["it","Italiano"],["es","Español"],["hi","हिन्दी"]].map(([c,l])=>`<option value="${c}" ${(DB.settings.language||"en")===c?"selected":""}>${l}</option>`).join("")}
+    </select></div>
+  </div>
+  <div class="field" style="margin-top:8px;"><label>Reminder Notifications</label>
+    <div class="row"><button class="btn ghost sm" id="enableNotifBtn">🔔 Enable Notifications</button><span id="notifStatus" style="color:var(--sub);font-size:13px;">${("Notification" in window) ? (Notification.permission==="granted"?"Enabled":"Not enabled") : "Not supported on this browser"}</span></div>
+  </div>
+  <div class="field"><label>Daily Schedule Starts At</label><select id="setDayStart">
+    ${Array.from({length:24},(_,h)=>h).map(h=>{
+      const label = h===0?"12:00 AM":(h<12?`${h}:00 AM`:(h===12?"12:00 PM":`${h-12}:00 PM`));
+      const cur = (DB.settings.dayStartHour!=null)?DB.settings.dayStartHour:6;
+      return `<option value="${h}" ${cur===h?"selected":""}>${label}</option>`;
+    }).join("")}
+  </select><div style="color:var(--sub);font-size:12px;margin-top:4px;">Sets where the Planner's Daily view begins — useful for night-shift schedules.</div></div>
+  <div class="field"><label>Default Month/Year</label><div class="row"><span>${MONTHS[curMonth-1]} ${curYear} (current view)</span></div></div>
+  </div>
   <div class="section"><h3>Categories</h3>
     <div id="catList">${Object.keys(DB.categories).map(c=>`<span class="badge" style="background:var(--bg);color:var(--ink);border:1px solid var(--line);margin:2px;">${c}</span>`).join(" ")}</div>
     <div class="row" style="margin-top:10px;"><input type="text" id="newCat" placeholder="New category name"><button class="btn ghost sm" id="addCatBtn">+ Add Category</button></div>
@@ -580,11 +945,13 @@ function renderAll(){
   const app=document.getElementById("app");
   if(view==="dashboard") app.innerHTML = renderDashboard()+renderCalendar();
   else if(view==="calendar") app.innerHTML = renderCalendar();
+  else if(view==="planner") app.innerHTML = renderPlanner();
   else if(view==="monthly") app.innerHTML = renderMonthly();
   else if(view==="annual") app.innerHTML = renderAnnual();
   else if(view==="history") app.innerHTML = renderHistory();
   else if(view==="settings") app.innerHTML = renderSettings();
   attachHandlers();
+  checkReminders();
 }
 function attachHandlers(){
   document.querySelectorAll(".day[data-d]").forEach(d=>d.onclick=()=>openDayModal(d.dataset.d));
@@ -592,9 +959,78 @@ function attachHandlers(){
   if(pm) pm.onclick=()=>{ curMonth--; if(curMonth<1){curMonth=12;curYear--;} renderAll(); };
   if(nm) nm.onclick=()=>{ curMonth++; if(curMonth>12){curMonth=1;curYear++;} renderAll(); };
   document.querySelectorAll(".hist-jump").forEach(b=>b.onclick=()=>{ curYear=Number(b.dataset.y); curMonth=Number(b.dataset.m); view="monthly"; renderAll(); });
+  /* Planner handlers */
+  document.querySelectorAll(".plview").forEach(b=>b.onclick=()=>{ plannerView=b.dataset.pv; renderAll(); });
+  const pPrevD=document.getElementById("planPrevDay"); if(pPrevD) pPrevD.onclick=()=>{ plannerDate=addDays(plannerDate,-1); renderAll(); };
+  const pNextD=document.getElementById("planNextDay"); if(pNextD) pNextD.onclick=()=>{ plannerDate=addDays(plannerDate,1); renderAll(); };
+  const pPrevW=document.getElementById("planPrevWeek"); if(pPrevW) pPrevW.onclick=()=>{ plannerDate=addDays(plannerDate,-7); renderAll(); };
+  const pNextW=document.getElementById("planNextWeek"); if(pNextW) pNextW.onclick=()=>{ plannerDate=addDays(plannerDate,7); renderAll(); };
+  const pPrevM=document.getElementById("planPrevM"); if(pPrevM) pPrevM.onclick=()=>{ let [y,m]=plannerDate.split("-").map(Number); m--; if(m<1){m=12;y--;} plannerDate=`${y}-${String(m).padStart(2,"0")}-01`; renderAll(); };
+  const pNextM=document.getElementById("planNextM"); if(pNextM) pNextM.onclick=()=>{ let [y,m]=plannerDate.split("-").map(Number); m++; if(m>12){m=1;y++;} plannerDate=`${y}-${String(m).padStart(2,"0")}-01`; renderAll(); };
+  document.querySelectorAll(".plan-add").forEach(b=>b.onclick=()=>openPlanForm(b.dataset.date,b.dataset.time,null));
+  document.querySelectorAll(".plan-edit").forEach(b=>b.onclick=()=>openPlanForm(null,null,b.dataset.id));
+  document.querySelectorAll(".plan-del").forEach(b=>b.onclick=()=>{
+    const it=DB.plannerItems.find(x=>x.id===b.dataset.id);
+    showConfirm(`${t("delete")} "${it?it.title:''}"?`, ()=>{ DB.plannerItems=DB.plannerItems.filter(x=>x.id!==b.dataset.id); save(); renderAll(); }, {danger:true, yesLabel:t("delete")});
+  });
+  document.querySelectorAll(".plan-day").forEach(d=>d.onclick=()=>{ plannerDate=d.dataset.d; plannerView="daily"; renderAll(); });
+  const addTaskBtn=document.getElementById("addTaskBtn"); if(addTaskBtn) addTaskBtn.onclick=()=>openPlanForm(todayISO(),"",null);
+  document.querySelectorAll(".task-done").forEach(c=>c.onchange=()=>{
+    const it=DB.plannerItems.find(x=>x.id===c.dataset.id); if(it){ it.completed=c.checked; save(); renderAll(); }
+  });
+  document.querySelectorAll(".addTaskForDay").forEach(b=>b.onclick=()=>openPlanForm(b.dataset.date,"",null));
+  const dnb=document.getElementById("dayNotesBox"); if(dnb) dnb.onblur=()=>{
+    if(!DB.dayNotes) DB.dayNotes={};
+    DB.dayNotes[dnb.dataset.date]=dnb.value; save();
+  };
+  const mnb=document.getElementById("monthNotesBox"); if(mnb) mnb.onblur=()=>{
+    if(!DB.monthNotes) DB.monthNotes={};
+    const k=mnb.dataset.key; DB.monthNotes[k]=Object.assign({notes:"",priorities:""}, DB.monthNotes[k], {notes:mnb.value}); save();
+  };
+  const mpb=document.getElementById("monthPrioBox"); if(mpb) mpb.onblur=()=>{
+    if(!DB.monthNotes) DB.monthNotes={};
+    const k=mpb.dataset.key; DB.monthNotes[k]=Object.assign({notes:"",priorities:""}, DB.monthNotes[k], {priorities:mpb.value}); save();
+  };
+  /* Board handlers */
+  const btInput=document.getElementById("boardTitleInput"); if(btInput) btInput.onblur=()=>{
+    
+    currentBoard().title = btInput.value.trim() || currentBoard().title; save();
+  };
+  const bAddPhoto=document.getElementById("boardAddPhotoBtn"); if(bAddPhoto) bAddPhoto.onclick=()=>document.getElementById("boardPhotoInput").click();
+  const bPhotoInput=document.getElementById("boardPhotoInput"); if(bPhotoInput) bPhotoInput.onchange=async ()=>{
+    const file = bPhotoInput.files[0]; if(!file) return;
+    if(!file.type.startsWith("image/")){ toast("Please choose an image file.", true); return; }
+    try{
+      const dataUrl = await resizeImageFile(file, 900);
+      
+      currentBoard().items.push({id:uid(), type:"photo", dataUrl, caption:"", rotation:Math.round(Math.random()*10-5), createdAt:nowISO()});
+      save(); renderAll(); toast(t("save")+"!");
+    }catch(e){ toast("Couldn't read that photo — try a different file.", true); }
+    bPhotoInput.value="";
+  };
+  const bAddNote=document.getElementById("boardAddNoteBtn"); if(bAddNote) bAddNote.onclick=()=>openNoteForm(null);
+  const bAddSticker=document.getElementById("boardAddStickerBtn"); if(bAddSticker) bAddSticker.onclick=()=>openStickerPicker(null);
+  document.querySelectorAll(".board-sticker-swap").forEach(el=>el.onclick=()=>openStickerPicker(el.dataset.id));
+  document.querySelectorAll(".board-edit").forEach(b=>b.onclick=()=>{
+    const it=currentBoard().items.find(x=>x.id===b.dataset.id);
+    if(it && it.type==="note") openNoteForm(it.id); else openPhotoCaptionForm(b.dataset.id);
+  });
+  document.querySelectorAll(".board-del").forEach(b=>b.onclick=()=>{
+    showConfirm(t("delete")+"?", ()=>{ currentBoard().items=currentBoard().items.filter(x=>x.id!==b.dataset.id); save(); renderAll(); }, {danger:true, yesLabel:t("delete")});
+  });
+  document.querySelectorAll(".board-cap, .board-note-text").forEach(el=>el.onclick=()=>{
+    const it=currentBoard().items.find(x=>x.id===el.dataset.id);
+    if(it && it.type==="note") openNoteForm(it.id); else openPhotoCaptionForm(el.dataset.id);
+  });
   const hs=document.getElementById("histSearch");
   if(hs){ runHistSearch(); hs.oninput=runHistSearch; document.getElementById("filtType").onchange=runHistSearch; document.getElementById("filtStatus").onchange=runHistSearch; }
   const sc=document.getElementById("setCurrency"); if(sc) sc.onchange=()=>{ DB.settings.currency=sc.value; save(); renderAll(); };
+  const sl=document.getElementById("setLanguage"); if(sl) sl.onchange=()=>{ DB.settings.language=sl.value; save(); renderAll(); };
+  const sds=document.getElementById("setDayStart"); if(sds) sds.onchange=()=>{ DB.settings.dayStartHour=Number(sds.value); save(); renderAll(); };
+  const enb=document.getElementById("enableNotifBtn"); if(enb) enb.onclick=()=>{
+    if(!("Notification" in window)){ toast("Notifications aren't supported on this browser.", true); return; }
+    Notification.requestPermission().then(()=>{ renderAll(); });
+  };
   const sdn=document.getElementById("saveDisplayName"); if(sdn) sdn.onclick=()=>{
     DB.settings.displayName=(document.getElementById("setDisplayName").value||"").trim(); save(); renderAll(); toast("Title updated.");
   };
@@ -626,7 +1062,7 @@ function attachHandlers(){
   };
   const ra=document.getElementById("resetAllBtn"); if(ra) ra.onclick=()=>{
     showConfirm("This will permanently delete ALL locally stored transactions, budgets and historical records.\nThis action cannot be undone.", ()=>{
-      DB={transactions:[],budgets:[],categories:JSON.parse(JSON.stringify(DEFAULT_CATS)),settings:DB.settings}; save(); renderAll(); toast("All data reset.");
+      DB={transactions:[],budgets:[],plannerItems:[],categories:JSON.parse(JSON.stringify(DEFAULT_CATS)),settings:DB.settings}; save(); renderAll(); toast(t("dataReset"));
     }, {danger:true, requireText:"RESET", yesLabel:"Reset All Data"});
   };
 }
@@ -634,6 +1070,24 @@ function downloadFile(name, content, type){
   const blob=new Blob([content],{type}); const a=document.createElement("a");
   a.href=URL.createObjectURL(blob); a.download=name; a.click(); URL.revokeObjectURL(a.href);
 }
+
+/* ---------- Local reminders (no backend — works while the app is open/recently used) ---------- */
+function checkReminders(){
+  if(!DB.plannerItems || !("Notification" in window) || Notification.permission!=="granted") return;
+  const now = new Date();
+  let changed=false;
+  DB.plannerItems.forEach(it=>{
+    if(!it.reminder || it.notified || it.completed || !it.time) return;
+    const dt = new Date(it.date+"T"+it.time+":00");
+    const diffMin = (dt-now)/60000;
+    if(diffMin<=5 && diffMin>=-2){
+      try{ new Notification(it.title, {body: it.notes||"", icon:"icons/icon-192.png"}); }catch(e){}
+      it.notified=true; changed=true;
+    }
+  });
+  if(changed) save();
+}
+setInterval(checkReminders, 60000);
 
 checkAuth();
 
