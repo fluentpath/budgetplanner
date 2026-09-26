@@ -18,6 +18,10 @@
   --bg:#f4f6f9;--card:#fff;--ink:#1c2430;--sub:#6b7686;--line:#e4e8ee;
   --accent:#4f6ef7;--accent-ink:#fff;--green:#1c9d63;--red:#e0483e;--amber:#c98a1f;
   --radius:14px;--shadow:0 1px 2px rgba(20,25,40,.06),0 6px 20px rgba(20,25,40,.05);
+  --p-pink:#ffd9e6;--p-pink-ink:#8a3b5a;--p-peach:#ffe3c9;--p-peach-ink:#8a5a2b;
+  --p-yellow:#fff4c2;--p-yellow-ink:#8a7420;--p-green:#d4f4dd;--p-green-ink:#2f7a4d;
+  --p-blue:#d6ebff;--p-blue-ink:#2f6a99;--p-purple:#e6dcfb;--p-purple-ink:#6a4a99;
+  --p-gray:#f1eef2;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 }
@@ -69,6 +73,22 @@ th{color:var(--sub);font-weight:600;font-size:12px;text-transform:uppercase;}
 .day .dinc{font-size:11.5px;color:var(--green);}
 .day.empty{background:transparent;border:none;cursor:default;}
 .day .dstatus{font-size:10px;color:var(--sub);}
+/* Planner — pastel styling */
+.pcard{border-radius:12px;padding:12px;background:var(--p-gray);}
+.pcard.pink{background:var(--p-pink);color:var(--p-pink-ink);}
+.pcard.peach{background:var(--p-peach);color:var(--p-peach-ink);}
+.pcard.yellow{background:var(--p-yellow);color:var(--p-yellow-ink);}
+.pcard.green{background:var(--p-green);color:var(--p-green-ink);}
+.pcard.blue{background:var(--p-blue);color:var(--p-blue-ink);}
+.pcard.purple{background:var(--p-purple);color:var(--p-purple-ink);}
+.pcard h4{margin:0 0 8px;font-size:13px;letter-spacing:.03em;text-transform:uppercase;}
+.pcard .prow{display:flex;gap:8px;padding:5px 0;border-bottom:1px dashed rgba(0,0,0,.08);font-size:13.5px;}
+.pcard .prow:last-child{border-bottom:none;}
+.pcard .ptime{width:52px;flex-shrink:0;font-weight:700;opacity:.75;font-size:12px;}
+.pweekday-hdr{border-radius:10px 10px 0 0;padding:6px 4px;text-align:center;font-weight:700;font-size:12px;}
+.pweekcol{border-radius:10px;overflow:hidden;background:var(--card);box-shadow:var(--shadow);}
+.pweekcol .pbody{padding:8px;min-height:70px;}
+
 .modal-bg{position:fixed;inset:0;background:rgba(10,12,18,.5);display:flex;align-items:flex-end;justify-content:center;z-index:100;}
 @media(min-width:640px){.modal-bg{align-items:center;}}
 .modal{background:var(--card);border-radius:16px 16px 0 0;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;padding:18px;}
@@ -92,6 +112,20 @@ th{color:var(--sub);font-weight:600;font-size:12px;text-transform:uppercase;}
 .catgroup h4{margin:0 0 6px;font-size:13px;color:var(--sub);text-transform:uppercase;}
 footer.tag{text-align:center;color:var(--sub);font-size:12px;padding:20px 0 0;}
 input:focus,select:focus,button:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;}
+/* Planner pastel theme */
+.planner-hero{border-radius:18px;padding:18px;background:linear-gradient(135deg,#fdf2f8,#f2f7fd);border:1px solid var(--line);}
+:root[data-theme="dark"] .planner-hero{background:linear-gradient(135deg,#2a2233,#22283a);}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .planner-hero{background:linear-gradient(135deg,#2a2233,#22283a);}}
+.planner-title{font-family:Georgia,serif;letter-spacing:.04em;font-size:20px;text-transform:uppercase;}
+.dow-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px;}
+.dow-chip{border-radius:10px;padding:6px 4px;text-align:center;font-weight:700;font-size:11px;color:#3a3a3a;}
+.pastel-card{border-radius:14px;padding:12px;border:1px solid var(--line);}
+.sched-row{display:grid;grid-template-columns:56px 1fr auto;gap:8px;align-items:start;padding:6px 0;border-bottom:1px dashed var(--line);}
+.sched-hour{font-size:11px;color:var(--sub);padding-top:3px;}
+.todo-line{display:flex;gap:8px;align-items:center;padding:4px 0;border-bottom:1px dotted var(--line);}
+.week-card-head{border-radius:10px 10px 0 0;padding:6px 10px;font-weight:700;font-size:12.5px;margin:-12px -12px 8px -12px;}
+.mday{border-radius:12px;min-height:78px;}
+.mday .mdot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:3px;}
 </style>
 </head>
 <body>
@@ -122,7 +156,7 @@ const DEFAULT_CATS = {
   "Entertainment":["Other"],"Savings":["Other"],"Miscellaneous":["Other"]
 };
 function blankDB(){
-  return { transactions:[], budgets:[], plannerItems:[], categories:JSON.parse(JSON.stringify(DEFAULT_CATS)), settings:{currency:"PHP", language:"en", defaultYear:2026, defaultMonth:9, firstDay:"Sun", displayName:""} };
+  return { transactions:[], budgets:[], plannerItems:[], dayNotes:{}, monthNotes:{}, categories:JSON.parse(JSON.stringify(DEFAULT_CATS)), settings:{currency:"PHP", language:"en", defaultYear:2026, defaultMonth:9, firstDay:"Sun", displayName:""} };
 }
 let DB = blankDB(); // replaced with the signed-in account's data once authenticated
 function dataKey(email){ return "hbp_data_v1__"+email; }
@@ -293,7 +327,7 @@ function todayISO(){ const d=new Date(); return d.getFullYear()+"-"+String(d.get
 const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
 
 /* ---------- Nav & topbar ---------- */
-const NAVS=[["dashboard","dashboard"],["calendar","calendar"],["planner","planner"],["monthly","monthly"],["annual","annual"],["history","history"],["settings","settings"]];
+const NAVS=[["dashboard","dashboard"],["planner","planner"],["monthly","monthly"],["annual","annual"],["history","history"],["settings","settings"]];
 function renderNav(){
   applyDir();
   document.getElementById("header").style.display="";
@@ -444,44 +478,69 @@ function renderAnnual(){
 function plannerForDate(d){ return DB.plannerItems.filter(p=>p.date===d).sort((a,b)=>(a.time||"99:99").localeCompare(b.time||"99:99")); }
 function weekStart(d){ const dt=new Date(d+"T00:00:00"); dt.setDate(dt.getDate()-dt.getDay()); return dt; }
 function addDays(d,n){ const dt=new Date(d+"T00:00:00"); dt.setDate(dt.getDate()+n); return dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0"); }
+const PASTELS = ["#ffd6e0","#ffe8c2","#eaf5c0","#c8f0df","#c7e9f5","#dcd0f5","#ffd0d8"]; // Sun..Sat
 function renderPlanner(){
   const subnav = `<div class="row" style="margin-bottom:10px;">
     ${[["daily","daily"],["weekly","weekly"],["monthly","monthlyView"],["tasks","tasks"]].map(([k,l])=>`<button class="btn ${plannerView===k?'':'ghost'} sm plview" data-pv="${k}">${t(l)}</button>`).join("")}
     <button class="btn ghost sm" id="planToday">${t("today")}</button>
   </div>`;
-  if(plannerView==="tasks") return `<div class="section"><h2>${t("planner")}</h2>${subnav}${renderTasksList()}</div>`;
-  if(plannerView==="weekly") return `<div class="section"><h2>${t("planner")}</h2>${subnav}${renderWeekly()}</div>`;
-  if(plannerView==="monthly") return `<div class="section"><h2>${t("planner")}</h2>${subnav}${renderPlannerMonth()}</div>`;
-  return `<div class="section"><h2>${t("planner")}</h2>${subnav}${renderDailyGrid()}</div>`;
+  let body;
+  if(plannerView==="tasks") body = renderTasksList();
+  else if(plannerView==="weekly") body = renderWeekly();
+  else if(plannerView==="monthly") body = renderPlannerMonth();
+  else body = renderDailyGrid();
+  return `<div class="planner-hero"><div class="planner-title">✨ ${t("planner")}</div>${subnav}${body}</div>`;
 }
 function renderDailyGrid(){
   const items = plannerForDate(plannerDate);
-  const hours = Array.from({length:24},(_,h)=>h);
+  const tasksToday = items.filter(it=>it.type==="task");
+  const eventsToday = items.filter(it=>it.type!=="task");
+  const dow = new Date(plannerDate+"T00:00:00").getDay();
+  const hours = Array.from({length:17},(_,i)=>i+6); // 6am - 10pm, matches the reference layout
   const rows = hours.map(h=>{
     const hh = String(h).padStart(2,"0");
-    const here = items.filter(it=>(it.time||"").startsWith(hh));
-    return `<div class="spread" style="border-bottom:1px solid var(--line);padding:6px 0;">
-      <div style="width:56px;color:var(--sub);font-size:12px;">${hh}:00</div>
-      <div style="flex:1;">${here.map(it=>`<div class="entryline" style="border:none;padding:2px 0;"><div class="meta"><div class="desc" style="${it.completed?'text-decoration:line-through;color:var(--sub);':''}">${it.title}</div>${it.notes?`<div class="sub">${it.notes}</div>`:""}</div><button class="btn ghost sm plan-edit" data-id="${it.id}">${t("edit")}</button></div>`).join("")}</div>
-      <button class="btn ghost sm plan-add" data-date="${plannerDate}" data-time="${hh}:00">+</button>
+    const here = eventsToday.filter(it=>(it.time||"").startsWith(hh));
+    const label = h<12?`${h} AM`:(h===12?"12 PM":`${h-12} PM`);
+    return `<div class="sched-row">
+      <div class="sched-hour">${label}</div>
+      <div>${here.map(it=>`<div style="${it.completed?'text-decoration:line-through;color:var(--sub);':''}">${it.title}${it.notes?` <span class="sub">— ${it.notes}</span>`:""}</div>`).join("") || ""}</div>
+      <button class="btn ghost sm plan-add" data-date="${plannerDate}" data-time="${hh}:00" style="padding:2px 8px;">+</button>
     </div>`;
   }).join("");
-  return `<div class="spread"><button class="btn ghost sm" id="planPrevDay">‹</button><h3>${plannerDate}</h3><button class="btn ghost sm" id="planNextDay">›</button></div>
-  <div style="max-height:60vh;overflow-y:auto;margin-top:8px;">${rows}</div>`;
+  const notesVal = (DB.dayNotes && DB.dayNotes[plannerDate]) || "";
+  return `<div class="spread" style="margin-top:6px;"><button class="btn ghost sm" id="planPrevDay">‹</button><h3 style="margin:0;">${plannerDate}</h3><button class="btn ghost sm" id="planNextDay">›</button></div>
+  <div class="grid2" style="margin-top:10px;">
+    <div class="pastel-card" style="background:${PASTELS[dow]}22;">
+      <div style="font-weight:700;margin-bottom:6px;">📅 ${t("daily")}</div>
+      <div style="max-height:52vh;overflow-y:auto;">${rows}</div>
+    </div>
+    <div>
+      <div class="pastel-card" style="background:${PASTELS[(dow+3)%7]}22;margin-bottom:10px;">
+        <div class="spread"><span style="font-weight:700;">✓ ${t("tasks")}</span><button class="btn ghost sm addTaskForDay" data-date="${plannerDate}">${t("addTask")}</button></div>
+        ${tasksToday.map(it=>`<div class="todo-line"><input type="checkbox" class="task-done" data-id="${it.id}" ${it.completed?'checked':''}><span style="flex:1;${it.completed?'text-decoration:line-through;color:var(--sub);':''}">${it.title}</span><button class="btn ghost sm plan-edit" data-id="${it.id}">${t("edit")}</button></div>`).join("") || `<div style="color:var(--sub);font-size:13px;">—</div>`}
+      </div>
+      <div class="pastel-card" style="background:${PASTELS[(dow+5)%7]}22;">
+        <div style="font-weight:700;margin-bottom:6px;">📝 ${t("notes")}</div>
+        <textarea id="dayNotesBox" data-date="${plannerDate}" style="width:100%;min-height:70px;background:transparent;border:none;resize:vertical;">${notesVal}</textarea>
+      </div>
+    </div>
+  </div>`;
 }
 function renderWeekly(){
   const start = weekStart(plannerDate);
   const startStr = start.getFullYear()+"-"+String(start.getMonth()+1).padStart(2,"0")+"-"+String(start.getDate()).padStart(2,"0");
   const days = Array.from({length:7},(_,i)=>addDays(startStr,i));
-  const cols = days.map(d=>{
+  const dowNames=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const cols = days.map((d,i)=>{
     const items = plannerForDate(d);
-    return `<div class="card"><div class="label">${d}</div>
-      ${items.map(it=>`<div class="entryline" style="border:none;padding:3px 0;"><div class="meta"><div class="desc" style="${it.completed?'text-decoration:line-through;color:var(--sub);':''}">${it.time?it.time+' — ':''}${it.title}</div></div></div>`).join("") || `<div style="color:var(--sub);font-size:12px;">—</div>`}
-      <button class="btn ghost sm plan-add" data-date="${d}" data-time="" style="margin-top:6px;">+</button>
+    return `<div class="pastel-card" style="background:var(--card);">
+      <div class="week-card-head" style="background:${PASTELS[i]};">${dowNames[i]} <span style="font-weight:400;opacity:.75;">${d.slice(5)}</span></div>
+      ${items.map(it=>`<div class="todo-line" style="border-bottom:1px dotted var(--line);"><span style="flex:1;${it.completed?'text-decoration:line-through;color:var(--sub);':''}">${it.time?`<b>${it.time}</b> `:'• '}${it.title}</span></div>`).join("") || `<div style="color:var(--sub);font-size:12px;padding:4px 0;">—</div>`}
+      <button class="btn ghost sm plan-add" data-date="${d}" data-time="" style="margin-top:8px;">+</button>
     </div>`;
   }).join("");
-  return `<div class="spread"><button class="btn ghost sm" id="planPrevWeek">‹</button><h3>${days[0]} – ${days[6]}</h3><button class="btn ghost sm" id="planNextWeek">›</button></div>
-  <div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-top:8px;">${cols}</div>`;
+  return `<div class="spread" style="margin-top:6px;"><button class="btn ghost sm" id="planPrevWeek">‹</button><h3 style="margin:0;">${days[0]} – ${days[6]}</h3><button class="btn ghost sm" id="planNextWeek">›</button></div>
+  <div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:10px;">${cols}</div>`;
 }
 function renderPlannerMonth(){
   const [y,m] = plannerDate.split("-").map(Number);
@@ -491,17 +550,24 @@ function renderPlannerMonth(){
   for(let d=1; d<=dim; d++){
     const ds = `${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
     const items = plannerForDate(ds);
-    cells.push(`<div class="day plan-day" data-d="${ds}"><div class="dnum">${d}</div>${items.length?`<div class="dstatus">${items.length} •</div>`:""}</div>`);
+    const dow = new Date(ds+"T00:00:00").getDay();
+    cells.push(`<div class="day mday plan-day" data-d="${ds}" style="background:${PASTELS[dow]}18;"><div class="dnum">${d}</div>${items.slice(0,3).map(it=>`<div style="font-size:10px;"><span class="mdot" style="background:${PASTELS[dow]};"></span>${it.title.slice(0,10)}</div>`).join("")}${items.length>3?`<div style="font-size:10px;color:var(--sub);">+${items.length-3} more</div>`:""}</div>`);
   }
-  return `<div class="spread"><button class="btn ghost sm" id="planPrevM">‹</button><h3>${MONTHS[m-1]} ${y}</h3><button class="btn ghost sm" id="planNextM">›</button></div>
-  <div class="calgrid">${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d=>`<div class="dow">${d}</div>`).join("")}${cells.join("")}</div>`;
+  const key = `${y}-${String(m).padStart(2,"0")}`;
+  const mn = (DB.monthNotes && DB.monthNotes[key]) || {notes:"",priorities:""};
+  return `<div class="spread" style="margin-top:6px;"><button class="btn ghost sm" id="planPrevM">‹</button><h3 style="margin:0;">${MONTHS[m-1]} ${y}</h3><button class="btn ghost sm" id="planNextM">›</button></div>
+  <div class="dow-strip">${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d,i)=>`<div class="dow-chip" style="background:${PASTELS[i]};">${d}</div>`).join("")}</div>
+  <div class="calgrid" style="grid-template-columns:repeat(7,1fr);">${cells.join("")}</div>
+  <div class="grid2" style="margin-top:14px;">
+    <div class="pastel-card"><div style="font-weight:700;margin-bottom:6px;">${t("notes")}</div><textarea id="monthNotesBox" data-key="${key}" data-field="notes" style="width:100%;min-height:60px;background:transparent;border:none;resize:vertical;">${mn.notes}</textarea></div>
+    <div class="pastel-card"><div style="font-weight:700;margin-bottom:6px;">Priorities</div><textarea id="monthPrioBox" data-key="${key}" data-field="priorities" style="width:100%;min-height:60px;background:transparent;border:none;resize:vertical;">${mn.priorities}</textarea></div>
+  </div>`;
 }
 function renderTasksList(){
   const tasks = DB.plannerItems.filter(p=>p.type==="task").sort((a,b)=>(a.completed?1:0)-(b.completed?1:0) || (a.date||"").localeCompare(b.date||""));
   return `<button class="btn sm" id="addTaskBtn">${t("addTask")}</button>
-  <div style="margin-top:10px;">${tasks.map(it=>`
-    <div class="entryline"><div class="meta"><label style="display:flex;gap:8px;align-items:center;"><input type="checkbox" class="task-done" data-id="${it.id}" ${it.completed?'checked':''}><span style="${it.completed?'text-decoration:line-through;color:var(--sub);':''}">${it.title}</span></label>${it.date?`<div class="sub">${it.date}${it.time?' '+it.time:''}</div>`:""}</div>
-    <div class="row"><button class="btn ghost sm plan-edit" data-id="${it.id}">${t("edit")}</button><button class="btn ghost sm plan-del" data-id="${it.id}">${t("delete")}</button></div></div>`).join("") || `<p style="color:var(--sub)">—</p>`}</div>`;
+  <div class="pastel-card" style="margin-top:10px;background:var(--card);">${tasks.map((it,i)=>`
+    <div class="todo-line"><input type="checkbox" class="task-done" data-id="${it.id}" ${it.completed?'checked':''}><span style="flex:1;${it.completed?'text-decoration:line-through;color:var(--sub);':''}">${it.title}</span>${it.date?`<span class="sub" style="margin-right:6px;">${it.date}${it.time?' '+it.time:''}</span>`:""}<button class="btn ghost sm plan-edit" data-id="${it.id}">${t("edit")}</button><button class="btn ghost sm plan-del" data-id="${it.id}">${t("delete")}</button></div>`).join("") || `<p style="color:var(--sub)">—</p>`}</div>`;
 }
 let editingPlanId=null;
 function openPlanForm(date,time,id){
@@ -755,6 +821,19 @@ function attachHandlers(){
   document.querySelectorAll(".task-done").forEach(c=>c.onchange=()=>{
     const it=DB.plannerItems.find(x=>x.id===c.dataset.id); if(it){ it.completed=c.checked; save(); renderAll(); }
   });
+  document.querySelectorAll(".addTaskForDay").forEach(b=>b.onclick=()=>openPlanForm(b.dataset.date,"",null));
+  const dnb=document.getElementById("dayNotesBox"); if(dnb) dnb.onblur=()=>{
+    if(!DB.dayNotes) DB.dayNotes={};
+    DB.dayNotes[dnb.dataset.date]=dnb.value; save();
+  };
+  const mnb=document.getElementById("monthNotesBox"); if(mnb) mnb.onblur=()=>{
+    if(!DB.monthNotes) DB.monthNotes={};
+    const k=mnb.dataset.key; DB.monthNotes[k]=Object.assign({notes:"",priorities:""}, DB.monthNotes[k], {notes:mnb.value}); save();
+  };
+  const mpb=document.getElementById("monthPrioBox"); if(mpb) mpb.onblur=()=>{
+    if(!DB.monthNotes) DB.monthNotes={};
+    const k=mpb.dataset.key; DB.monthNotes[k]=Object.assign({notes:"",priorities:""}, DB.monthNotes[k], {priorities:mpb.value}); save();
+  };
   const hs=document.getElementById("histSearch");
   if(hs){ runHistSearch(); hs.oninput=runHistSearch; document.getElementById("filtType").onchange=runHistSearch; document.getElementById("filtStatus").onchange=runHistSearch; }
   const sc=document.getElementById("setCurrency"); if(sc) sc.onchange=()=>{ DB.settings.currency=sc.value; save(); renderAll(); };
